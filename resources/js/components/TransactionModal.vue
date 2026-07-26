@@ -88,6 +88,9 @@
 
         <!-- Actions -->
         <div class="modal-footer">
+          <button v-if="isEdit" type="button" @click="deleteTxn" class="btn-ghost modal-btn text-danger">
+            Delete
+          </button>
           <button type="button" @click="$emit('close')" class="btn-ghost modal-btn">Cancel</button>
           <button
             type="submit"
@@ -108,7 +111,10 @@
 import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
 
-const props = defineProps({ transaction: { type: Object, default: null } })
+const props = defineProps({
+  transaction: { type: Object, default: null },
+  defaultAccountId: { type: [Number, String], default: '' }
+})
 const emit  = defineEmits(['close', 'saved'])
 const toast = inject('toast')
 
@@ -120,7 +126,7 @@ const categories = ref([])
 
 const form = reactive({
   type:          props.transaction?.type           ?? 'expense',
-  account_id:    props.transaction?.account_id     ?? '',
+  account_id:    props.transaction?.account_id     ?? props.defaultAccountId ?? '',
   to_account_id: props.transaction?.to_account_id  ?? '',
   category_id:   props.transaction?.category_id    ?? '',
   amount:        props.transaction?.amount         ?? '',
@@ -195,6 +201,19 @@ async function submit() {
   }
 }
 
+async function deleteTxn() {
+  if (!confirm('Delete this transaction? This will reverse the balance change.')) return
+  loading.value = true
+  try {
+    await axios.delete(`/api/transactions/${props.transaction.id}`)
+    toast('Transaction deleted')
+    emit('saved')
+  } catch (e) {
+    toast('Delete failed', 'error')
+    loading.value = false
+  }
+}
+
 onMounted(fetchFormData)
 </script>
 
@@ -235,6 +254,13 @@ onMounted(fetchFormData)
 .modal-footer { display: flex; gap: 0.75rem; padding-top: 0.25rem; }
 
 .modal-btn { flex: 1; justify-content: center; }
+
+.text-danger {
+  color: var(--danger);
+}
+.text-danger:hover {
+  background-color: var(--danger-light);
+}
 
 /* ── Type Toggle ──────────────────────────────────────────── */
 .type-toggle {

@@ -120,7 +120,8 @@
           <div class="account-list">
             <div v-for="acc in data.accounts" :key="acc.id" class="account-row">
               <div class="account-icon" :style="{ backgroundColor: acc.color + '20', color: acc.color }">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <img v-if="acc.icon && acc.icon !== 'wallet'" :src="`/bankIcons/${acc.icon}`" class="w-5 h-5 object-contain" />
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
@@ -197,6 +198,13 @@
                 :class="txn.type === 'income' ? 'amount-positive' : txn.type === 'expense' ? 'amount-negative' : 'amount-transfer'">
                 {{ txn.type === 'income' ? '+' : txn.type === 'expense' ? '−' : '' }}{{ formatCurrency(txn.amount) }}
               </span>
+              <div class="row-actions">
+                <button @click="deleteTransaction(txn)" class="action-btn action-btn--delete" title="Delete">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <div v-if="!data.recent_transactions?.length" class="empty-state empty-state--sm">
               <p class="empty-text">No transactions yet</p>
@@ -210,11 +218,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, inject } from 'vue'
 import axios from 'axios'
 import { Chart, registerables } from 'chart.js'
 
 Chart.register(...registerables)
+
+const toast = inject('toast')
 
 const props = defineProps({
   isDark: {
@@ -250,12 +260,23 @@ async function fetchDashboard() {
   try {
     const { data: d } = await axios.get('/api/dashboard')
     data.value = d
-    await nextTick()
-    renderCharts()
   } catch (e) {
     console.error(e)
   } finally {
     loading.value = false
+  }
+  await nextTick()
+  renderCharts()
+}
+
+async function deleteTransaction(txn) {
+  if (!confirm('Delete this transaction? This will reverse the balance change.')) return
+  try {
+    await axios.delete(`/api/transactions/${txn.id}`)
+    if (toast) toast('Transaction deleted')
+    fetchDashboard()
+  } catch (e) {
+    if (toast) toast('Delete failed', 'error')
   }
 }
 
@@ -545,6 +566,8 @@ onMounted(fetchDashboard)
   flex-shrink: 0;
 }
 
+.object-contain { object-fit: contain; }
+
 .account-info {
   flex: 1;
   min-width: 0;
@@ -634,6 +657,32 @@ onMounted(fetchDashboard)
   align-items: center;
   gap: 0.75rem;
 }
+
+.txn-row:hover .row-actions { opacity: 1; }
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-left: 0.25rem;
+}
+
+.action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  color: var(--text-muted);
+}
+.action-btn--delete:hover { background-color: var(--danger-light); color: var(--danger); }
 
 .txn-icon {
   width: 28px;

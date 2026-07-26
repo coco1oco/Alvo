@@ -16,11 +16,13 @@ class Account extends Model
         'balance',
         'color',
         'icon',
+        'is_archived',
     ];
 
     /** @var array<string, string> */
     protected $casts = [
         'balance' => 'decimal:2',
+        'is_archived' => 'boolean',
     ];
 
     /**

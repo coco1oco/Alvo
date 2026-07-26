@@ -7,6 +7,12 @@
         <p class="view-subtitle">Manage your income, expenses &amp; transfers</p>
       </div>
       <div class="header-actions">
+        <button @click="showTrashModal = true" class="btn-ghost">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Trash
+        </button>
         <button @click="exportCsv" class="btn-ghost">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -130,6 +136,13 @@
       @close="showModal = false"
       @saved="onSaved"
     />
+    
+    <!-- Trash Modal -->
+    <TrashModal
+      v-if="showTrashModal"
+      @close="showTrashModal = false"
+      @restored="fetchTransactions"
+    />
   </div>
 </template>
 
@@ -137,6 +150,7 @@
 import { ref, reactive, onMounted, inject } from 'vue'
 import axios from 'axios'
 import TransactionModal from './TransactionModal.vue'
+import TrashModal from './TrashModal.vue'
 
 const emit         = defineEmits(['refresh'])
 const toast        = inject('toast')
@@ -144,6 +158,7 @@ const loading      = ref(true)
 const transactions = ref([])
 const pagination   = ref({})
 const showModal    = ref(false)
+const showTrashModal = ref(false)
 const editingTxn   = ref(null)
 let searchTimeout  = null
 

@@ -27,6 +27,9 @@ Route::prefix('api')->middleware('clerk')->group(function () {
 
     // Transactions
     Route::get('/transactions/export', [TransactionController::class, 'export']);
+    Route::get('/transactions/trashed', [TransactionController::class, 'trashed']);
+    Route::post('/transactions/{id}/restore', [TransactionController::class, 'restore']);
+    Route::delete('/transactions/{id}/force', [TransactionController::class, 'forceDelete']);
     Route::apiResource('transactions', TransactionController::class);
 
     // Budgets

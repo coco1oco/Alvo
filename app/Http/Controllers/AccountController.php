@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AccountController extends AbstractController
 {
@@ -33,7 +34,14 @@ class AccountController extends AbstractController
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'name'    => 'required|string|max:100',
+            'name'    => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('accounts')->where(function ($query) use ($request) {
+                    return $query->where('user_id', $request->user()->id);
+                })
+            ],
             'type'    => 'required|in:cash,bank,credit_card,savings,other',
             'balance' => 'nullable|numeric',
             'color'   => 'nullable|string|max:7',
@@ -63,10 +71,19 @@ class AccountController extends AbstractController
         $this->authorizeAccount($request, $account);
 
         $data = $request->validate([
-            'name'  => 'sometimes|required|string|max:100',
+            'name'  => [
+                'sometimes',
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('accounts')->where(function ($query) use ($request) {
+                    return $query->where('user_id', $request->user()->id);
+                })->ignore($account->id)
+            ],
             'type'  => 'sometimes|required|in:cash,bank,credit_card,savings,other',
             'color' => 'sometimes|nullable|string|max:7',
             'icon'  => 'sometimes|nullable|string|max:50',
+            'is_archived' => 'sometimes|boolean',
         ]);
 
         $account->update($data);

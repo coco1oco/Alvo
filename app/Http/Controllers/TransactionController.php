@@ -155,6 +155,58 @@ class TransactionController extends AbstractController
     }
 
     /**
+     * List soft-deleted transactions for the authenticated user.
+     *
+     * @param  Request $request
+     * @return JsonResponse
+     */
+    public function trashed(Request $request): JsonResponse
+    {
+        $transactions = $request->user()
+            ->transactions()
+            ->onlyTrashed()
+            ->with(['account', 'toAccount', 'category'])
+            ->orderBy('deleted_at', 'desc')
+            ->get();
+
+        return response()->json($transactions);
+    }
+
+    /**
+     * Restore a soft-deleted transaction and reapply its balance effect.
+     *
+     * @param  Request $request
+     * @param  int     $id
+     * @return JsonResponse
+     */
+    public function restore(Request $request, $id): JsonResponse
+    {
+        $transaction = $request->user()->transactions()->onlyTrashed()->findOrFail($id);
+
+        DB::transaction(function () use ($request, $transaction) {
+            $transaction->restore();
+            $this->applyBalanceEffect($request->user(), $transaction);
+        });
+
+        return response()->json(['message' => 'Transaction restored']);
+    }
+
+    /**
+     * Permanently delete a soft-deleted transaction.
+     *
+     * @param  Request $request
+     * @param  int     $id
+     * @return JsonResponse
+     */
+    public function forceDelete(Request $request, $id): JsonResponse
+    {
+        $transaction = $request->user()->transactions()->onlyTrashed()->findOrFail($id);
+        $transaction->forceDelete();
+
+        return response()->json(['message' => 'Transaction permanently deleted']);
+    }
+
+    /**
      * Export all transactions for the authenticated user as a CSV file.
      *
      * @param  Request $request the incoming HTTP request
