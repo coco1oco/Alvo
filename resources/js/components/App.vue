@@ -1,7 +1,6 @@
 <template>
   <div id="alvo-app" :class="isDark ? 'dark' : ''">
-    <div class="min-h-screen font-sans antialiased transition-colors duration-200"
-         style="background-color: var(--bg-base); color: var(--text-primary);">
+    <div class="min-h-screen font-sans antialiased transition-colors duration-200 app-bg">
 
       <!-- Auth Screen -->
       <AuthView v-if="!isLoaded || !isSignedIn" />
@@ -10,13 +9,11 @@
       <div v-else class="flex h-screen overflow-hidden">
 
         <!-- ── Sidebar ─────────────────────────────────────────── -->
-        <aside class="w-60 flex flex-col flex-shrink-0 transition-colors duration-200"
-               style="background-color: var(--bg-surface); border-right: 1px solid var(--border);">
+        <aside class="w-60 flex flex-col flex-shrink-0 transition-colors duration-200 app-sidebar">
 
           <!-- Logo -->
-          <div class="p-5 flex items-center gap-3" style="border-bottom: 1px solid var(--border);">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0"
-                 style="background: linear-gradient(135deg, #1A56DB, #4B8EF8); box-shadow: 0 4px 12px rgba(26,86,219,0.35);">
+          <div class="p-5 flex items-center gap-3 sidebar-header">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 app-logo">
               <!-- Alvo logo mark: target/crosshair -->
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -24,8 +21,8 @@
               </svg>
             </div>
             <div>
-              <h1 class="text-sm font-bold tracking-tight" style="color: var(--text-primary);">Alvo</h1>
-              <p class="text-xs" style="color: var(--text-muted);">Finance Manager</p>
+              <h1 class="text-sm font-bold tracking-tight text-primary-color">Alvo</h1>
+              <p class="text-xs text-muted-color">Finance Manager</p>
             </div>
           </div>
 
@@ -39,8 +36,7 @@
             >
               <!-- Active indicator bar -->
               <span v-if="currentView === item.view"
-                    class="absolute left-3 w-0.5 h-4 rounded-full"
-                    style="background-color: var(--primary);">
+                    class="absolute left-3 w-0.5 h-4 rounded-full nav-indicator">
               </span>
               <component :is="item.icon" class="w-[18px] h-[18px] flex-shrink-0" />
               {{ item.label }}
@@ -48,25 +44,21 @@
           </nav>
 
           <!-- Sidebar Footer: Theme Toggle + User + Logout -->
-          <div class="p-3 space-y-1" style="border-top: 1px solid var(--border);">
+          <div class="p-3 space-y-1 sidebar-footer">
             <!-- User Info Row -->
-            <div class="flex items-center gap-2.5 px-2 py-2 rounded-xl" style="color: var(--text-primary);">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                   style="background: linear-gradient(135deg, #1A56DB, #4B8EF8);">
+            <div class="flex items-center gap-2.5 px-2 py-2 rounded-xl text-primary-color">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 user-avatar">
                 {{ user?.firstName?.charAt(0) || user?.primaryEmailAddress?.emailAddress?.charAt(0).toUpperCase() || 'A' }}
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold truncate" style="color: var(--text-primary);">{{ user?.fullName || 'User' }}</p>
-                <p class="text-xs truncate" style="color: var(--text-muted);">{{ user?.primaryEmailAddress?.emailAddress }}</p>
+                <p class="text-xs font-semibold truncate text-primary-color">{{ user?.fullName || 'User' }}</p>
+                <p class="text-xs truncate text-muted-color">{{ user?.primaryEmailAddress?.emailAddress }}</p>
               </div>
               <!-- Theme Toggle -->
               <button
                 @click="toggleTheme"
                 :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                style="color: var(--text-secondary);"
-                onmouseenter="this.style.background='var(--bg-surface-2)';this.style.color='var(--text-primary)'"
-                onmouseleave="this.style.background='transparent';this.style.color='var(--text-secondary)'"
+                class="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-secondary-color theme-toggle"
               >
                 <!-- Sun icon (shown in dark mode) -->
                 <svg v-if="isDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,10 +75,7 @@
 
             <!-- Sign Out -->
             <button @click="logout"
-              class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
-              style="color: var(--text-secondary);"
-              onmouseenter="this.style.background='var(--danger-light)';this.style.color='var(--danger)'"
-              onmouseleave="this.style.background='transparent';this.style.color='var(--text-secondary)'"
+              class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all text-secondary-color logout-btn"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -98,8 +87,7 @@
         </aside>
 
         <!-- ── Main Content ───────────────────────────────────── -->
-        <main class="flex-1 overflow-y-auto transition-colors duration-200"
-              style="background-color: var(--bg-base);">
+        <main class="flex-1 overflow-y-auto transition-colors duration-200 app-main">
           <Transition name="page" mode="out-in">
             <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" />
             <TransactionsView v-else-if="currentView === 'transactions'" :key="'transactions-' + refreshKey" @refresh="refresh" />
@@ -114,8 +102,7 @@
       <transition-group name="toast" tag="div" class="fixed bottom-6 right-6 z-50 space-y-2">
         <div
           v-for="toast in toasts" :key="toast.id"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border"
-          style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.15);"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border toast-item"
           :style="toast.type === 'success'
             ? { background: 'var(--success-light)', borderColor: 'var(--success)', color: 'var(--success)' }
             : { background: 'var(--danger-light)',  borderColor: 'var(--danger)',  color: 'var(--danger)' }"
@@ -270,3 +257,20 @@ provide('toast', showToast)
 provide('refresh', refresh)
 provide('isDark', isDark)
 </script>
+
+<style scoped>
+.app-bg { background-color: var(--bg-base); color: var(--text-primary); }
+.app-sidebar { background-color: var(--bg-surface); border-right: 1px solid var(--border); }
+.sidebar-header { border-bottom: 1px solid var(--border); }
+.app-logo { background: linear-gradient(135deg, #1A56DB, #4B8EF8); box-shadow: 0 4px 12px rgba(26,86,219,0.35); }
+.text-primary-color { color: var(--text-primary); }
+.text-muted-color { color: var(--text-muted); }
+.text-secondary-color { color: var(--text-secondary); }
+.nav-indicator { background-color: var(--primary); }
+.sidebar-footer { border-top: 1px solid var(--border); }
+.user-avatar { background: linear-gradient(135deg, #1A56DB, #4B8EF8); }
+.theme-toggle:hover { background-color: var(--bg-surface-2); color: var(--text-primary); }
+.logout-btn:hover { background-color: var(--danger-light); color: var(--danger); }
+.app-main { background-color: var(--bg-base); }
+.toast-item { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+</style>

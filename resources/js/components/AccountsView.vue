@@ -86,20 +86,20 @@
         </div>
 
         <!-- Archived Section -->
-        <div v-if="archivedAccounts.length" class="archived-section mt-6" style="margin-top: 1.5rem;">
+        <div v-if="archivedAccounts.length" class="archived-section mt-6 archived-section-mt">
           <button @click="showArchived = !showArchived" class="toggle-archived-btn">
             {{ showArchived ? 'Hide' : 'Show' }} Archived Accounts ({{ archivedAccounts.length }})
           </button>
           
-          <div v-if="showArchived" class="accounts-grid" style="margin-top: 1rem; opacity: 0.75;">
-            <div v-for="acc in archivedAccounts" :key="acc.id" class="glass-card account-card group" style="background-color: rgba(0,0,0,0.02);">
+          <div v-if="showArchived" class="accounts-grid archived-grid-wrap">
+            <div v-for="acc in archivedAccounts" :key="acc.id" class="glass-card account-card group archived-card">
               <div class="account-top">
                 <div class="account-identity">
-                  <div class="account-icon" style="background-color: transparent; border: 1px solid var(--border-strong); opacity: 0.5;">
-                    <svg class="w-5 h-5" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                  <div class="account-icon archived-icon">
+                    <svg class="w-5 h-5 text-muted-color" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                   </div>
                   <div>
-                    <h3 class="account-name" style="color: var(--text-secondary);">{{ acc.name }}</h3>
+                    <h3 class="account-name text-secondary-color">{{ acc.name }}</h3>
                     <p class="account-type">{{ acc.type.replace('_', ' ') }} (Archived)</p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@
           </div>
           <div class="nw-operator">=</div>
           <div class="nw-item nw-total">
-            <p class="nw-label" style="color: var(--primary);">Net Worth</p>
+            <p class="nw-label text-primary-color">Net Worth</p>
             <p class="nw-value" :class="totalBalance >= 0 ? 'text-primary' : 'amount-negative'">
               {{ formatCurrency(totalBalance) }}
             </p>
@@ -176,7 +176,7 @@
           </div>
           <div>
             <div class="color-picker-header">
-              <label class="label" style="margin-bottom: 0;">Color</label>
+              <label class="label label-no-mb">Color</label>
               <button type="button" @click="showColors = !showColors" class="color-toggle-btn">
                 {{ showColors ? 'Hide' : 'Customize' }}
               </button>
@@ -801,4 +801,13 @@ onMounted(fetchAccounts)
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
+
+.archived-section-mt { margin-top: 1.5rem; }
+.archived-grid-wrap { margin-top: 1rem; opacity: 0.75; }
+.archived-card { background-color: rgba(0,0,0,0.02); }
+.archived-icon { background-color: transparent; border: 1px solid var(--border-strong); opacity: 0.5; }
+.text-muted-color { color: var(--text-muted); }
+.text-secondary-color { color: var(--text-secondary); }
+.text-primary-color { color: var(--primary); }
+.label-no-mb { margin-bottom: 0; }
 </style>
