@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\User;
+use App\Http\Requests\RegisterUserRequest;
+use App\Http\Requests\LoginUserRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,16 +44,12 @@ class AuthController extends AbstractController
     /**
      * Register a new user and seed default categories and accounts.
      *
-     * @param  Request $request the incoming HTTP request
+     * @param  RegisterUserRequest $request the incoming HTTP request
      * @return JsonResponse
      */
-    public function register(Request $request): JsonResponse
+    public function register(RegisterUserRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $data = $request->validated();
 
         $user = User::create([
             'name'     => $data['name'],
@@ -80,16 +78,13 @@ class AuthController extends AbstractController
     /**
      * Authenticate an existing user.
      *
-     * @param  Request $request the incoming HTTP request
+     * @param  LoginUserRequest $request the incoming HTTP request
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginUserRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->validated();
 
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([

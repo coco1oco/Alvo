@@ -42,11 +42,11 @@
     --text-secondary: #5A6478;
     --text-muted:     #9AA3B2;
 
-    /* Primary — Sapphire */
-    --primary:        #1A56DB;
-    --primary-hover:  #1447C7;
-    --primary-light:  #EBF0FD;
-    --primary-glass:  rgba(26, 86, 219, 0.12);
+    /* Primary — Teal */
+    --primary:        #0D9488;
+    --primary-hover:  #0F766E;
+    --primary-light:  #CCFBF1;
+    --primary-glass:  rgba(13, 148, 136, 0.12);
 
     /* Semantic */
     --success:        #12A179;
@@ -59,7 +59,7 @@
     /* Shadows */
     --shadow-sm:      0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
     --shadow-md:      0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
-    --shadow-glass:   0 8px 32px rgba(26, 86, 219, 0.10);
+    --shadow-glass:   0 8px 32px rgba(13, 148, 136, 0.10);
 }
 
 /* Dark Mode */
@@ -79,11 +79,11 @@
     --text-secondary: #A1A1AA;
     --text-muted:     #52525B;
 
-    /* Primary — Blue */
-    --primary:        #3B82F6;
-    --primary-hover:  #60A5FA;
-    --primary-light:  rgba(59, 130, 246, 0.15);
-    --primary-glass:  rgba(59, 130, 246, 0.10);
+    /* Primary — Teal */
+    --primary:        #2DD4BF;
+    --primary-hover:  #5EEAD4;
+    --primary-light:  rgba(45, 212, 191, 0.15);
+    --primary-glass:  rgba(45, 212, 191, 0.10);
 
     /* Semantic */
     --success:        #34D399;

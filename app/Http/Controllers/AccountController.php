@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Http\Requests\StoreAccountRequest;
+use App\Http\Requests\UpdateAccountRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class AccountController extends AbstractController
 {
@@ -28,25 +29,12 @@ class AccountController extends AbstractController
     /**
      * Create a new account for the authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
+     * @param  StoreAccountRequest $request the incoming HTTP request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreAccountRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'name'    => [
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('accounts')->where(function ($query) use ($request) {
-                    return $query->where('user_id', $request->user()->id);
-                })
-            ],
-            'type'    => 'required|in:cash,bank,credit_card,savings,other',
-            'balance' => 'nullable|numeric',
-            'color'   => 'nullable|string|max:7',
-            'icon'    => 'nullable|string|max:50',
-        ]);
+        $data = $request->validated();
 
         $account = $request->user()->accounts()->create([
             'name'    => $data['name'],
@@ -62,29 +50,15 @@ class AccountController extends AbstractController
     /**
      * Update an existing account.
      *
-     * @param  Request $request the incoming HTTP request
-     * @param  Account $account the account to update
+     * @param  UpdateAccountRequest $request the incoming HTTP request
+     * @param  Account              $account the account to update
      * @return JsonResponse
      */
-    public function update(Request $request, Account $account): JsonResponse
+    public function update(UpdateAccountRequest $request, Account $account): JsonResponse
     {
         $this->authorizeAccount($request, $account);
 
-        $data = $request->validate([
-            'name'  => [
-                'sometimes',
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('accounts')->where(function ($query) use ($request) {
-                    return $query->where('user_id', $request->user()->id);
-                })->ignore($account->id)
-            ],
-            'type'  => 'sometimes|required|in:cash,bank,credit_card,savings,other',
-            'color' => 'sometimes|nullable|string|max:7',
-            'icon'  => 'sometimes|nullable|string|max:50',
-            'is_archived' => 'sometimes|boolean',
-        ]);
+        $data = $request->validated();
 
         $account->update($data);
 

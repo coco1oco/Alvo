@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
+use App\Http\Requests\StoreBudgetRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -47,16 +48,12 @@ class BudgetController extends AbstractController
     /**
      * Create or update a budget for the authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
+     * @param  StoreBudgetRequest $request the incoming HTTP request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreBudgetRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'amount'      => 'required|numeric|min:0.01',
-            'month'       => 'required|date_format:Y-m',
-        ]);
+        $data = $request->validated();
 
         // Ensure category belongs to user
         $request->user()->categories()->findOrFail($data['category_id']);

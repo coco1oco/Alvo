@@ -17,6 +17,7 @@
     "dependencies": {
         "@clerk/themes": "^2.4.57",
         "@clerk/vue": "^2.4.20",
+        "@heroicons/vue": "^2.2.0",
         "@vitejs/plugin-vue": "^6.0.7",
         "chart.js": "^4.5.1",
         "vue": "^3.5.39"
