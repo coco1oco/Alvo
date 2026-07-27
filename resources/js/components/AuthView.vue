@@ -32,10 +32,7 @@
       <!-- Brand Content -->
       <div class="brand-content">
         <div class="brand-logo">
-          <svg class="brand-logo-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
+          <img :src="isDark ? '/logo-dark.svg' : '/logo.svg'" alt="Logo" class="w-10 h-10 drop-shadow-md" />
           <h1 class="brand-name">Alvo</h1>
         </div>
         <h2 class="brand-tagline">Aim. Save. Achieve.</h2>
@@ -58,7 +55,7 @@
     <div class="auth-zone">
       <div class="auth-form-container">
         <!-- We mount Clerk's SignIn component -->
-        <SignIn :appearance="clerkAppearance" :localization="clerkLocalization" />
+        <SignIn :appearance="clerkAppearance" />
       </div>
     </div>
   </div>
@@ -71,36 +68,22 @@ import { dark } from '@clerk/themes'
 
 const isDark = inject('isDark')
 
-const clerkLocalization = {
-  signIn: {
-    start: {
-      title: 'Welcome to Alvo',
-      subtitle: 'Sign in to manage your finances',
-    }
-  },
-  signUp: {
-    start: {
-      title: 'Create your account',
-      subtitle: 'Join Alvo to get started',
-    }
-  }
-}
 
 const clerkAppearance = computed(() => {
   const isDarkMode = isDark.value
   return {
     baseTheme: isDarkMode ? dark : undefined,
     variables: {
-      colorPrimary:        isDarkMode ? '#3B82F6' : '#1A56DB',
-      colorBackground:     isDarkMode ? '#0F0F11' : '#FFFFFF',
-      colorText:           isDarkMode ? '#EDEDED' : '#0F1923',
-      colorTextSecondary:  isDarkMode ? '#A1A1AA' : '#5A6478',
-      colorInputBackground: isDarkMode ? '#111111' : '#F9FAFB',
-      colorInputText:       isDarkMode ? '#EDEDED' : '#0F1923',
-      colorDanger:         '#EF4444',
+      colorPrimary:        '#D97757',
+      colorBackground:     isDarkMode ? '#1E1E1C' : '#FFFFFF',
+      colorText:           isDarkMode ? '#FAF9F5' : '#141413',
+      colorTextSecondary:  isDarkMode ? '#B0AEA5' : '#B0AEA5',
+      colorInputBackground: isDarkMode ? '#141413' : '#FAF9F5',
+      colorInputText:       isDarkMode ? '#FAF9F5' : '#141413',
+      colorDanger:         '#E03131',
       borderRadius:        '0.75rem',
       fontFamily:          'Geist, Inter, sans-serif',
-      spacingUnit:         '1rem'
+      spacingUnit:         '1.1rem'
     },
     layout: {
       socialButtonsPlacement: 'bottom',
@@ -110,13 +93,13 @@ const clerkAppearance = computed(() => {
     elements: {
       rootBox:    { width: '100%', display: 'flex', justifyContent: 'center' },
       cardBox:    { 
-        boxShadow: isDarkMode ? '0 4px 24px rgba(0,0,0,0.4)' : '0 12px 32px rgba(0,0,0,0.08)', 
-        border: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.04)', 
-        background: isDarkMode ? '#0F0F11' : '#FFFFFF', 
-        padding: '2rem', 
+        boxShadow: 'none', 
+        border: '0px solid transparent', 
+        background: 'transparent', 
+        padding: '0', 
         width: '100%', 
-        maxWidth: '420px',
-        borderRadius: '1.25rem'
+        maxWidth: '100%',
+        borderRadius: '0'
       },
       headerTitle: { 
         fontSize: '1.5rem', 
@@ -140,8 +123,8 @@ const clerkAppearance = computed(() => {
       },
       formFieldInput: {
         borderRadius: '0.75rem',
-        borderColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-        backgroundColor: isDarkMode ? '#111111' : '#F9FAFB',
+        borderColor: isDarkMode ? 'rgba(250,249,245,0.1)' : 'rgba(0,0,0,0.1)',
+        backgroundColor: isDarkMode ? '#141413' : '#FAF9F5',
         height: '2.75rem',
         color: isDarkMode ? '#EDEDED' : '#0F1923',
         transition: 'border-color 0.15s'
@@ -150,10 +133,11 @@ const clerkAppearance = computed(() => {
         height: '2.75rem',
         borderRadius: '0.75rem',
         fontSize: '0.9375rem',
-        fontWeight: '600',
+        fontWeight: '700',
+        color: '#141413',
         textTransform: 'none',
-        background: 'linear-gradient(135deg, #1A56DB, #4B8EF8)',
-        boxShadow: '0 4px 12px rgba(26,86,219,0.25)',
+        background: 'linear-gradient(135deg, #D97757, #EDA086)',
+        boxShadow: '0 4px 12px rgba(217,119,87,0.25)',
         border: 'none',
         transition: 'transform 0.15s, box-shadow 0.15s'
       },
@@ -189,15 +173,16 @@ const clerkAppearance = computed(() => {
 <style scoped>
 .auth-page {
   display: flex;
-  min-height: 100vh;
+  height: 100dvh;
   width: 100%;
+  overflow: hidden;
 }
 
 /* ── LEFT PANEL: Brand Stage ───────────────────────────────── */
 .brand-stage {
   flex: 0 0 55%;
   position: relative;
-  background-color: #050505; /* Onyx */
+  background-color: #141413; /* Anthropic Dark */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -247,7 +232,7 @@ const clerkAppearance = computed(() => {
   height: 50vw;
   top: -10%;
   left: -10%;
-  background: #1A56DB;
+  background: #D97757;
   opacity: 0.15;
   animation: blob-drift 14s ease-in-out infinite;
 }
@@ -257,7 +242,7 @@ const clerkAppearance = computed(() => {
   height: 40vw;
   bottom: -10%;
   right: -10%;
-  background: #12A179;
+  background: #788C5D;
   opacity: 0.15;
   animation: blob-drift 18s ease-in-out infinite reverse;
 }
@@ -279,8 +264,8 @@ const clerkAppearance = computed(() => {
 }
 
 .demo-card {
-  background: rgba(17, 17, 17, 0.65) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 30, 28, 0.65) !important;
+  border: 1px solid rgba(250, 249, 245, 0.1) !important;
   width: 320px;
   backdrop-filter: blur(20px) saturate(180%);
 }
@@ -350,10 +335,9 @@ const clerkAppearance = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.brand-logo-svg {
+.brand-logo-img {
   width: 32px;
   height: 32px;
-  color: #3B82F6;
 }
 
 .brand-name {
@@ -389,14 +373,17 @@ const clerkAppearance = computed(() => {
 .auth-zone {
   flex: 0 0 45%;
   background-color: var(--bg-surface);
+  background-image: radial-gradient(rgba(176, 174, 165, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 4rem 10%;
+  overflow-y: auto;
 }
 
 .auth-form-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
 }
 </style>

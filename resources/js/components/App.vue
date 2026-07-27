@@ -2,27 +2,43 @@
   <div id="alvo-app" :class="isDark ? 'dark' : ''">
     <div class="min-h-screen font-sans antialiased transition-colors duration-200 app-bg">
 
-      <!-- Auth Screen -->
-      <AuthView v-if="!isLoaded || !isSignedIn" />
+      <!-- Global Loading State -->
+      <transition name="loader-fade">
+        <div v-if="!appInitialized" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
+          <!-- Ambient Glow -->
+          <div class="absolute w-[40vw] h-[40vw] bg-primary-color/20 blur-[100px] rounded-full animate-pulse-slow"></div>
+          
+          <div class="relative z-10 flex flex-col items-center gap-8">
+            <!-- Floating Logo -->
+            <div class="relative flex items-center justify-center logo-float">
+              <img :src="isDark ? '/logo-dark.svg' : '/logo.svg'" alt="Loading" class="w-16 h-16 drop-shadow-2xl" />
+            </div>
+            
+            <!-- Sleek Loading Bar -->
+            <div class="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-primary-color to-[#EDA086] loading-bar-progress"></div>
+            </div>
+          </div>
+        </div>
+      </transition>
 
-      <!-- Main App Shell -->
-      <div v-else class="flex h-screen overflow-hidden">
+      <!-- App Content (only shown when loaded) -->
+      <template v-if="appInitialized">
+        <!-- Auth Screen -->
+        <AuthView v-if="!isSignedIn" />
+
+        <!-- Main App Shell -->
+        <div v-else class="flex h-screen overflow-hidden">
 
         <!-- ── Sidebar ─────────────────────────────────────────── -->
         <aside class="w-60 flex flex-col flex-shrink-0 transition-colors duration-200 app-sidebar">
 
           <!-- Logo -->
           <div class="p-5 flex items-center gap-3 sidebar-header">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 app-logo">
-              <!-- Alvo logo mark: target/crosshair -->
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
+            <img :src="isDark ? '/logo-dark.svg' : '/logo.svg'" alt="Logo" class="w-9 h-9 flex-shrink-0 drop-shadow-sm" />
             <div>
-              <h1 class="text-sm font-bold tracking-tight text-primary-color">Alvo</h1>
-              <p class="text-xs text-muted-color">Finance Manager</p>
+              <h1 class="text-lg font-bold tracking-tight text-primary-color leading-tight">Alvo</h1>
+              <p class="text-xs text-muted-color font-medium">Finance Manager</p>
             </div>
           </div>
 
@@ -58,17 +74,50 @@
               <button
                 @click="toggleTheme"
                 :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                class="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-secondary-color theme-toggle"
+                class="w-7 h-7 rounded-lg flex items-center justify-center transition-all text-secondary-color theme-toggle active:scale-95"
               >
-                <!-- Sun icon (shown in dark mode) -->
-                <svg v-if="isDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                </svg>
-                <!-- Moon icon (shown in light mode) -->
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  stroke-linecap="round"
+                  viewBox="0 0 32 32"
+                  class="w-5 h-5 transition-transform duration-300"
+                >
+                  <clipPath id="theme-toggle-clip">
+                    <path
+                      class="transition-transform duration-300 ease-in-out"
+                      :style="{ transform: !isDark ? 'translate(-12px, 10px)' : 'translate(0, 0)' }"
+                      d="M0-5h30a1 1 0 0 0 9 13v24H0Z"
+                    />
+                  </clipPath>
+                  <g clip-path="url(#theme-toggle-clip)">
+                    <circle
+                      class="transition-all duration-300 ease-in-out"
+                      cx="16"
+                      cy="16"
+                      :r="!isDark ? 10 : 8"
+                    />
+                    <g
+                      class="transition-all duration-300 ease-in-out"
+                      :style="{ 
+                        transformOrigin: '16px 16px',
+                        transform: !isDark ? 'rotate(-100deg) scale(0.5)' : 'rotate(0deg) scale(1)', 
+                        opacity: !isDark ? 0 : 1 
+                      }"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path d="M16 5.5v-4" />
+                      <path d="M16 30.5v-4" />
+                      <path d="M1.5 16h4" />
+                      <path d="M26.5 16h4" />
+                      <path d="m23.4 8.6 2.8-2.8" />
+                      <path d="m5.7 26.3 2.9-2.9" />
+                      <path d="m5.8 5.8 2.8 2.8" />
+                      <path d="m23.4 23.4 2.9 2.9" />
+                    </g>
+                  </g>
                 </svg>
               </button>
             </div>
@@ -97,6 +146,7 @@
           </Transition>
         </main>
       </div>
+      </template>
 
       <!-- ── Toast Notifications ───────────────────────────────── -->
       <transition-group name="toast" tag="div" class="fixed bottom-6 right-6 z-50 space-y-2">
@@ -177,6 +227,13 @@ const refreshKey  = ref(0)
 // ── Clerk Auth ────────────────────────────────────────────────
 const { isLoaded, isSignedIn, signOut, getToken } = useAuth()
 const { user } = useUser()
+
+const appInitialized = ref(false)
+watch(isLoaded, (loaded) => {
+  if (loaded && !appInitialized.value) {
+    appInitialized.value = true
+  }
+}, { immediate: true })
 
 // Axios Interceptor for Clerk JWT
 const axiosInterceptor = axios.interceptors.request.use(async (config) => {
@@ -259,6 +316,41 @@ provide('isDark', isDark)
 </script>
 
 <style scoped>
+/* ── Premium Loader Animations ───────────────────────────────── */
+.loader-fade-enter-active, .loader-fade-leave-active {
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.loader-fade-enter-from, .loader-fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes float-logo {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.03); }
+}
+.logo-float {
+  animation: float-logo 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.15; transform: scale(0.9); }
+  50% { opacity: 0.3; transform: scale(1.1); }
+}
+.animate-pulse-slow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes loading-progress {
+  0% { transform: translateX(-150%); }
+  50% { transform: translateX(50%); }
+  100% { transform: translateX(250%); }
+}
+.loading-bar-progress {
+  width: 40%;
+  border-radius: 999px;
+  animation: loading-progress 1.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
 .app-bg { background-color: var(--bg-base); color: var(--text-primary); }
 .app-sidebar { background-color: var(--bg-surface); border-right: 1px solid var(--border); }
 .sidebar-header { border-bottom: 1px solid var(--border); }

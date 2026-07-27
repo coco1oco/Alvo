@@ -4,7 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>FinTrack - Personal Finance Manager</title>
+        <title>Alvo - Aim, Save, Achieve</title>
+        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

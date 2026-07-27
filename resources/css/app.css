@@ -28,29 +28,29 @@
 /* Light Mode (default) */
 :root {
     /* Backgrounds */
-    --bg-base:        #F5F7FA;
+    --bg-base:        #FAF9F5;
     --bg-surface:     #FFFFFF;
-    --bg-surface-2:   #EEF1F8;
-    --bg-glass:       rgba(255, 255, 255, 0.65);
+    --bg-surface-2:   #E8E6DC;
+    --bg-glass:       rgba(250, 249, 245, 0.65);
 
     /* Borders */
     --border:         rgba(0, 0, 0, 0.08);
     --border-strong:  rgba(0, 0, 0, 0.16);
 
     /* Text */
-    --text-primary:   #0F1923;
-    --text-secondary: #5A6478;
+    --text-primary:   #141413;
+    --text-secondary: #B0AEA5;
     --text-muted:     #9AA3B2;
 
-    /* Primary — Teal */
-    --primary:        #0D9488;
-    --primary-hover:  #0F766E;
-    --primary-light:  #CCFBF1;
-    --primary-glass:  rgba(13, 148, 136, 0.12);
+    /* Primary — Anthropic Orange */
+    --primary:        #D97757;
+    --primary-hover:  #C46345;
+    --primary-light:  #F7EBE8;
+    --primary-glass:  rgba(217, 119, 87, 0.12);
 
     /* Semantic */
-    --success:        #12A179;
-    --success-light:  #E6F7F3;
+    --success:        #788C5D;
+    --success-light:  #EEF2E8;
     --danger:         #E03131;
     --danger-light:   #FDECEC;
     --warning:        #E8890C;
@@ -59,35 +59,35 @@
     /* Shadows */
     --shadow-sm:      0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
     --shadow-md:      0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
-    --shadow-glass:   0 8px 32px rgba(13, 148, 136, 0.10);
+    --shadow-glass:   0 8px 32px rgba(217, 119, 87, 0.10);
 }
 
 /* Dark Mode */
 .dark {
     /* Backgrounds */
-    --bg-base:        #050505;
-    --bg-surface:     #111111;
-    --bg-surface-2:   #1A1A1A;
-    --bg-glass:       rgba(17, 17, 17, 0.75);
+    --bg-base:        #141413;
+    --bg-surface:     #1E1E1C;
+    --bg-surface-2:   #2A2A28;
+    --bg-glass:       rgba(20, 20, 19, 0.75);
 
     /* Borders */
-    --border:         rgba(255, 255, 255, 0.08);
-    --border-strong:  rgba(255, 255, 255, 0.16);
+    --border:         rgba(250, 249, 245, 0.08);
+    --border-strong:  rgba(250, 249, 245, 0.16);
 
     /* Text */
-    --text-primary:   #EDEDED;
-    --text-secondary: #A1A1AA;
+    --text-primary:   #FAF9F5;
+    --text-secondary: #B0AEA5;
     --text-muted:     #52525B;
 
-    /* Primary — Teal */
-    --primary:        #2DD4BF;
-    --primary-hover:  #5EEAD4;
-    --primary-light:  rgba(45, 212, 191, 0.15);
-    --primary-glass:  rgba(45, 212, 191, 0.10);
+    /* Primary — Anthropic Orange */
+    --primary:        #D97757;
+    --primary-hover:  #EDA086;
+    --primary-light:  rgba(217, 119, 87, 0.15);
+    --primary-glass:  rgba(217, 119, 87, 0.10);
 
     /* Semantic */
-    --success:        #34D399;
-    --success-light:  rgba(52, 211, 153, 0.12);
+    --success:        #788C5D;
+    --success-light:  rgba(120, 140, 93, 0.12);
     --danger:         #F87171;
     --danger-light:   rgba(248, 113, 113, 0.12);
     --warning:        #FBB03B;
