@@ -16,7 +16,7 @@
     <section>
       <div class="section-heading section-heading--income">
         <span class="section-dot section-dot--income"></span>
-        Income
+        Income ({{ income.length }})
       </div>
       <div class="categories-grid">
         <div
@@ -27,7 +27,7 @@
           <div class="cat-color-wash" :style="{ backgroundColor: `color-mix(in srgb, ${cat.color} 15%, transparent)` }"></div>
           <div class="cat-top">
             <div class="cat-icon" :style="{ backgroundColor: `color-mix(in srgb, ${cat.color} 15%, transparent)`, color: cat.color }">
-              <FolderIcon class="w-5 h-5" />
+              <component :is="getCategoryIcon(cat.name)" class="w-5 h-5" />
             </div>
             <div class="cat-actions">
               <button @click="openModal(cat)" class="action-btn action-btn--edit" title="Edit">
@@ -38,8 +38,16 @@
               </button>
             </div>
           </div>
-          <p class="cat-name">{{ cat.name }}</p>
-          <div class="cat-bar" :style="{ backgroundColor: cat.color }"></div>
+          <div class="cat-info mt-2">
+            <p class="cat-name">{{ cat.name }}</p>
+            <div class="cat-stats text-xs text-muted mt-1 flex items-center justify-between">
+              <span>{{ cat.transactions_count || 0 }} txns</span>
+              <span class="tabular-nums font-medium" :style="{ color: cat.color }">
+                {{ formatCurrency(cat.monthly_spend || 0) }}
+              </span>
+            </div>
+          </div>
+          <div class="cat-bar mt-2" :style="{ backgroundColor: cat.color }"></div>
         </div>
         
         <div v-if="!income.length" class="empty-state">
@@ -56,7 +64,7 @@
     <section>
       <div class="section-heading section-heading--expense">
         <span class="section-dot section-dot--expense"></span>
-        Expense
+        Expense ({{ expense.length }})
       </div>
       <div class="categories-grid">
         <div
@@ -67,7 +75,7 @@
           <div class="cat-color-wash" :style="{ backgroundColor: `color-mix(in srgb, ${cat.color} 15%, transparent)` }"></div>
           <div class="cat-top">
             <div class="cat-icon" :style="{ backgroundColor: `color-mix(in srgb, ${cat.color} 15%, transparent)`, color: cat.color }">
-              <FolderIcon class="w-5 h-5" />
+              <component :is="getCategoryIcon(cat.name)" class="w-5 h-5" />
             </div>
             <div class="cat-actions">
               <button @click="openModal(cat)" class="action-btn action-btn--edit" title="Edit">
@@ -78,8 +86,16 @@
               </button>
             </div>
           </div>
-          <p class="cat-name">{{ cat.name }}</p>
-          <div class="cat-bar" :style="{ backgroundColor: cat.color }"></div>
+          <div class="cat-info mt-2">
+            <p class="cat-name">{{ cat.name }}</p>
+            <div class="cat-stats text-xs text-muted mt-1 flex items-center justify-between">
+              <span>{{ cat.transactions_count || 0 }} txns</span>
+              <span class="tabular-nums font-medium text-danger">
+                {{ formatCurrency(cat.monthly_spend || 0) }}
+              </span>
+            </div>
+          </div>
+          <div class="cat-bar mt-2" :style="{ backgroundColor: cat.color }"></div>
         </div>
 
         <div v-if="!expense.length" class="empty-state">
@@ -168,7 +184,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
-import { PlusIcon, FolderIcon, PencilIcon, TrashIcon, XMarkIcon, FolderOpenIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import { 
+  PlusIcon, FolderIcon, PencilIcon, TrashIcon, XMarkIcon, FolderOpenIcon, ExclamationTriangleIcon,
+  ShoppingCartIcon, HomeIcon, BoltIcon, ArrowPathIcon, ShoppingBagIcon, BanknotesIcon, BeakerIcon, TruckIcon, SparklesIcon, TagIcon
+} from '@heroicons/vue/24/outline'
 import { CATEGORY_COLORS } from '../utils/constants'
 
 const toast      = inject('toast')
@@ -183,6 +202,24 @@ const form       = reactive({ name: '', type: 'expense', color: CATEGORY_COLORS[
 
 const income  = computed(() => categories.value.filter(c => c.type === 'income'))
 const expense = computed(() => categories.value.filter(c => c.type === 'expense'))
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount || 0)
+}
+
+function getCategoryIcon(name = '') {
+  const n = name.toLowerCase()
+  if (n.includes('groc') || n.includes('market')) return ShoppingCartIcon
+  if (n.includes('rent') || n.includes('hous') || n.includes('home')) return HomeIcon
+  if (n.includes('elec') || n.includes('util') || n.includes('power')) return BoltIcon
+  if (n.includes('sub') || n.includes('netfl') || n.includes('spot')) return ArrowPathIcon
+  if (n.includes('shop') || n.includes('cloth') || n.includes('store')) return ShoppingBagIcon
+  if (n.includes('sal') || n.includes('pay') || n.includes('incom') || n.includes('earn')) return BanknotesIcon
+  if (n.includes('water') || n.includes('bill')) return BeakerIcon
+  if (n.includes('trans') || n.includes('gas') || n.includes('car') || n.includes('ride')) return TruckIcon
+  if (n.includes('eat') || n.includes('din') || n.includes('rest') || n.includes('food')) return SparklesIcon
+  return TagIcon
+}
 
 async function fetchCategories() {
   const { data } = await axios.get('/api/categories')
@@ -294,12 +331,9 @@ onMounted(fetchCategories)
 /* ── Categories Grid ──────────────────────────────────────── */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
 }
-
-@media (min-width: 640px)  { .categories-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1280px) { .categories-grid { grid-template-columns: repeat(4, 1fr); } }
 
 /* ── Category Card ────────────────────────────────────────── */
 .category-card {

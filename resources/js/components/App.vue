@@ -4,7 +4,7 @@
 
       <!-- Global Loading State -->
       <transition name="loader-fade">
-        <div v-if="!appInitialized" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
+        <div v-if="!appInitialized || !isLoaded || isSigningOut" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
           <!-- Ambient Glow -->
           <div class="absolute w-[40vw] h-[40vw] bg-primary-color/20 blur-[100px] rounded-full animate-pulse-slow"></div>
           
@@ -23,7 +23,7 @@
       </transition>
 
       <!-- App Content (only shown when loaded) -->
-      <template v-if="appInitialized">
+      <template v-if="appInitialized && isLoaded && !isSigningOut">
         <!-- Auth Screen -->
         <AuthView v-if="!isSignedIn" />
 
@@ -138,11 +138,12 @@
         <!-- ── Main Content ───────────────────────────────────── -->
         <main class="flex-1 overflow-y-auto transition-colors duration-200 app-main">
           <Transition name="page" mode="out-in">
-            <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" />
+            <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" @navigate="currentView = $event" />
             <TransactionsView v-else-if="currentView === 'transactions'" :key="'transactions-' + refreshKey" @refresh="refresh" />
             <AccountsView    v-else-if="currentView === 'accounts'"    :key="'accounts-'    + refreshKey" @refresh="refresh" />
             <CategoriesView  v-else-if="currentView === 'categories'"  :key="'categories-'  + refreshKey" />
             <BudgetsView     v-else-if="currentView === 'budgets'"     :key="'budgets-'     + refreshKey" />
+            <SettingsView    v-else-if="currentView === 'settings'"    :key="'settings-'    + refreshKey" :is-dark="isDark" @toggle-theme="toggleTheme" />
           </Transition>
         </main>
       </div>
@@ -183,6 +184,8 @@ import AccountsView from './AccountsView.vue'
 import CategoriesView from './CategoriesView.vue'
 import BudgetsView from './BudgetsView.vue'
 
+import SettingsView from './SettingsView.vue'
+
 // ── Inline SVG Icon Components ────────────────────────────────
 const IconDashboard = defineComponent({
   render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
@@ -216,6 +219,15 @@ const IconBudgets = defineComponent({
   render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
     h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
       d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' })
+  ])
+})
+
+const IconSettings = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
+      d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }),
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
+      d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })
   ])
 })
 
@@ -275,6 +287,7 @@ const navItems = [
   { view: 'accounts',     label: 'Accounts',     icon: IconAccounts },
   { view: 'categories',   label: 'Categories',   icon: IconCategories },
   { view: 'budgets',      label: 'Budgets',      icon: IconBudgets },
+  { view: 'settings',     label: 'Settings',     icon: IconSettings },
 ]
 
 const activeNavStyle = {
@@ -304,9 +317,20 @@ function refresh() {
   refreshKey.value++
 }
 
+const isSigningOut = ref(false)
+
 async function logout() {
-  await signOut.value()
-  currentView.value = 'dashboard'
+  isSigningOut.value = true
+  try {
+    await signOut.value()
+    currentView.value = 'dashboard'
+  } catch (e) {
+    console.error('Logout error', e)
+  } finally {
+    setTimeout(() => {
+      isSigningOut.value = false
+    }, 500)
+  }
 }
 
 // ── Provide to children ───────────────────────────────────────

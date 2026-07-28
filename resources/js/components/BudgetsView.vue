@@ -7,7 +7,21 @@
         <p class="view-subtitle">Set monthly spending limits per category</p>
       </div>
       <div class="header-actions">
-        <input v-model="selectedMonth" type="month" @change="fetchBudgets" class="input-field month-input" />
+        <!-- Styled Month Navigator Pill -->
+        <div class="month-navigator-pill">
+          <button @click="prevMonth" class="month-nav-btn" title="Previous Month">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <span class="month-label font-semibold">{{ formattedMonthLabel }}</span>
+          <button @click="nextMonth" class="month-nav-btn" title="Next Month">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
         <button @click="showModal = true" class="btn-primary">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
@@ -22,66 +36,97 @@
       <div class="spinner"></div>
     </div>
 
-    <!-- Budget Cards -->
-    <div v-else-if="budgets.length" class="budgets-grid">
-      <div
-        v-for="b in budgets"
-        :key="b.id"
-        class="glass-card budget-card"
-        :class="b.percentage > 100 ? 'budget-card--over' : b.percentage > 80 ? 'budget-card--warn' : ''"
-      >
-        <!-- Card Header -->
-        <div class="budget-top">
-          <div class="budget-identity">
-            <div class="budget-icon" :style="{ backgroundColor: b.color + '20', color: b.color }">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+    <template v-else-if="budgets.length">
+      <!-- Summary Status Header Banner -->
+      <div class="glass-card budget-summary-banner mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="summary-badge-icon" :class="onTrackCount === budgets.length ? 'bg-success-light text-success' : 'bg-warning-light text-warning'">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span class="budget-category">{{ b.category?.name || b.category }}</span>
+            <div>
+              <h3 class="text-sm font-bold text-primary-color">
+                {{ onTrackCount }} of {{ budgets.length }} budgets on track
+              </h3>
+              <p class="text-xs text-muted">Total Budget: {{ formatCurrency(totalBudgetAmount) }} | Total Spent: {{ formatCurrency(totalSpentAmount) }}</p>
+            </div>
           </div>
-          <div class="budget-header-right">
-            <span :class="b.percentage > 100 ? 'badge badge-danger' : b.percentage > 80 ? 'badge badge-warning' : 'badge badge-success'">
-              {{ b.percentage }}%
-            </span>
-            <button @click="deleteBudget(b)" class="action-btn action-btn--delete" title="Delete">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
+          <div class="overall-progress-track flex-1 max-w-xs">
+            <div class="flex justify-between text-xs font-semibold mb-1">
+              <span>Overall Utilization</span>
+              <span>{{ Math.round((totalSpentAmount / (totalBudgetAmount || 1)) * 100) }}%</span>
+            </div>
+            <div class="budget-bar-track">
+              <div
+                class="budget-bar-fill"
+                :class="(totalSpentAmount / totalBudgetAmount) > 1 ? 'bar-danger' : (totalSpentAmount / totalBudgetAmount) > 0.8 ? 'bar-warning' : 'bar-success'"
+                :style="{ width: Math.min(Math.round((totalSpentAmount / (totalBudgetAmount || 1)) * 100), 100) + '%' }"
+              ></div>
+            </div>
           </div>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="budget-bar-track">
-          <div
-            class="budget-bar-fill"
-            :class="b.percentage > 100 ? 'bar-danger' : b.percentage > 80 ? 'bar-warning' : 'bar-success'"
-            :style="{ width: Math.min(b.percentage, 100) + '%' }"
-          ></div>
-        </div>
-
-        <!-- Amounts -->
-        <div class="budget-amounts">
-          <span class="tabular-nums">Spent: <strong class="amount-spent">{{ formatCurrency(b.spent) }}</strong></span>
-          <span class="tabular-nums">Limit: <strong class="amount-limit">{{ formatCurrency(b.budget) }}</strong></span>
-        </div>
-
-        <!-- Status Note -->
-        <div v-if="b.percentage > 100" class="budget-status budget-status--over">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          Over budget by {{ formatCurrency(b.spent - b.budget) }}
-        </div>
-        <div v-else class="budget-status budget-status--ok">
-          {{ formatCurrency(b.remaining) }} remaining
         </div>
       </div>
-    </div>
+
+      <!-- Fuel Gauge Budget Cards -->
+      <div class="budgets-grid">
+        <div
+          v-for="b in budgets"
+          :key="b.id"
+          class="glass-card budget-card"
+          :class="b.percentage > 100 ? 'budget-card--over' : b.percentage > 80 ? 'budget-card--warn' : ''"
+        >
+          <!-- Card Header -->
+          <div class="budget-top">
+            <div class="budget-identity">
+              <div class="budget-icon" :style="{ backgroundColor: b.color + '20', color: b.color }">
+                <component :is="getCategoryIcon(b.category?.name || b.category)" class="w-4 h-4" />
+              </div>
+              <span class="budget-category">{{ b.category?.name || b.category }}</span>
+            </div>
+            <div class="budget-header-right">
+              <span :class="b.percentage > 100 ? 'badge badge-danger' : b.percentage > 80 ? 'badge badge-warning' : 'badge badge-success'">
+                {{ b.percentage }}%
+              </span>
+              <button @click="deleteBudget(b)" class="action-btn action-btn--delete" title="Delete">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Bar (Fuel Gauge Track) -->
+          <div class="budget-bar-track my-3">
+            <div
+              class="budget-bar-fill"
+              :class="b.percentage > 100 ? 'bar-danger' : b.percentage > 80 ? 'bar-warning' : 'bar-success'"
+              :style="{ width: Math.min(b.percentage, 100) + '%' }"
+            ></div>
+          </div>
+
+          <!-- Amounts -->
+          <div class="budget-amounts">
+            <span class="tabular-nums">Spent: <strong class="amount-spent">{{ formatCurrency(b.spent) }}</strong></span>
+            <span class="tabular-nums">Limit: <strong class="amount-limit">{{ formatCurrency(b.budget) }}</strong></span>
+          </div>
+
+          <!-- Status Note -->
+          <div v-if="b.percentage > 100" class="budget-status budget-status--over">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Over budget by {{ formatCurrency(b.spent - b.budget) }}
+          </div>
+          <div v-else class="budget-status budget-status--ok">
+            {{ formatCurrency(b.remaining) }} remaining
+          </div>
+        </div>
+      </div>
+    </template>
 
     <!-- Empty State -->
     <div v-else class="empty-state">
@@ -89,7 +134,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
-      <p class="empty-title">No budgets for {{ selectedMonth }}</p>
+      <p class="empty-title">No budgets for {{ formattedMonthLabel }}</p>
       <p class="empty-hint">Click "Set Budget" to add a spending limit.</p>
     </div>
 
@@ -134,8 +179,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, inject } from 'vue'
+import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
+import { 
+  ShoppingCartIcon, HomeIcon, BoltIcon, ArrowPathIcon, ShoppingBagIcon, BanknotesIcon, BeakerIcon, TruckIcon, SparklesIcon, TagIcon
+} from '@heroicons/vue/24/outline'
 
 const toast           = inject('toast')
 const loading         = ref(true)
@@ -149,6 +197,45 @@ const now           = new Date()
 const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
 
 const form = reactive({ category_id: '', amount: '', month: selectedMonth.value })
+
+const formattedMonthLabel = computed(() => {
+  if (!selectedMonth.value) return ''
+  const [year, month] = selectedMonth.value.split('-')
+  const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+  return date.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })
+})
+
+const onTrackCount = computed(() => budgets.value.filter(b => b.percentage <= 100).length)
+const totalBudgetAmount = computed(() => budgets.value.reduce((acc, b) => acc + (parseFloat(b.budget) || 0), 0))
+const totalSpentAmount = computed(() => budgets.value.reduce((acc, b) => acc + (parseFloat(b.spent) || 0), 0))
+
+function prevMonth() {
+  const [year, month] = selectedMonth.value.split('-').map(Number)
+  const d = new Date(year, month - 2, 1)
+  selectedMonth.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  fetchBudgets()
+}
+
+function nextMonth() {
+  const [year, month] = selectedMonth.value.split('-').map(Number)
+  const d = new Date(year, month, 1)
+  selectedMonth.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  fetchBudgets()
+}
+
+function getCategoryIcon(name = '') {
+  const n = String(name).toLowerCase()
+  if (n.includes('groc') || n.includes('market')) return ShoppingCartIcon
+  if (n.includes('rent') || n.includes('hous') || n.includes('home')) return HomeIcon
+  if (n.includes('elec') || n.includes('util') || n.includes('power')) return BoltIcon
+  if (n.includes('sub') || n.includes('netfl') || n.includes('spot')) return ArrowPathIcon
+  if (n.includes('shop') || n.includes('cloth') || n.includes('store')) return ShoppingBagIcon
+  if (n.includes('sal') || n.includes('pay') || n.includes('incom') || n.includes('earn')) return BanknotesIcon
+  if (n.includes('water') || n.includes('bill')) return BeakerIcon
+  if (n.includes('trans') || n.includes('gas') || n.includes('car') || n.includes('ride')) return TruckIcon
+  if (n.includes('eat') || n.includes('din') || n.includes('rest') || n.includes('food')) return SparklesIcon
+  return TagIcon
+}
 
 function formatCurrency(v) {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(v || 0)
@@ -237,7 +324,55 @@ onMounted(() => {
 
 .header-actions { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
 
-.month-input { width: auto; }
+/* Month Navigator Pill */
+.month-navigator-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+}
+
+.month-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+.month-nav-btn:hover { color: var(--text-primary); background: var(--bg-surface-2); }
+
+.month-label {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  min-width: 6.5rem;
+  text-align: center;
+}
+
+/* Budget Summary Banner */
+.budget-summary-banner {
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.25rem;
+  background: var(--bg-glass);
+}
+
+.summary-badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
 .loading-state {
   display: flex;

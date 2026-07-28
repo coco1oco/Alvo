@@ -20,6 +20,27 @@
     </div>
 
     <template v-else>
+      <!-- Total Net Worth Summary Banner -->
+      <div class="glass-card summary-hero-card mb-6">
+        <div class="summary-hero-content">
+          <div>
+            <span class="summary-label">Total Net Worth</span>
+            <h2 class="summary-value tabular-nums">{{ formatCurrency(totalBalance) }}</h2>
+            <p class="summary-subtext">Across {{ activeAccounts.length }} active account{{ activeAccounts.length === 1 ? '' : 's' }}</p>
+          </div>
+          <div class="summary-breakdown">
+            <div class="summary-box">
+              <span class="box-label">Assets</span>
+              <span class="box-value amount-positive tabular-nums">{{ formatCurrency(totalAssets) }}</span>
+            </div>
+            <div class="summary-box">
+              <span class="box-label">Liabilities</span>
+              <span class="box-value amount-negative tabular-nums">{{ formatCurrency(totalLiabilities) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="account-groups-container">
         <!-- Grouped Accounts -->
         <div v-for="(groupAccounts, groupName) in groupedAccounts" :key="groupName" class="account-group" v-show="groupAccounts.length">
@@ -28,49 +49,78 @@
             <div
               v-for="acc in groupAccounts"
               :key="acc.id"
-              class="glass-card account-card group"
+              class="glass-card account-card account-brand-card group relative"
+              :style="{
+                background: `linear-gradient(140deg, color-mix(in srgb, ${acc.color} 24%, var(--bg-surface)) 0%, var(--bg-surface) 100%)`,
+                borderColor: `color-mix(in srgb, ${acc.color} 40%, transparent)`
+              }"
             >
               <div class="account-glow" :style="{ backgroundColor: acc.color }"></div>
 
-              <div class="account-top">
-                <div class="account-identity">
-                  <div class="account-icon" :style="{ backgroundColor: acc.color + '20', color: acc.color }">
+              <!-- Top Row: Identity + Menu -->
+              <div class="account-top flex items-center justify-between">
+                <div class="account-identity flex items-center gap-3">
+                  <div class="account-icon shadow-sm" :style="{ backgroundColor: acc.color + '30', color: acc.color }">
                     <img v-if="acc.icon && acc.icon !== 'wallet'" :src="`/bankIcons/${acc.icon}`" class="w-6 h-6 object-contain" />
                     <component v-else :is="accountIcon(acc.type)" class="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 class="account-name">{{ acc.name }}</h3>
-                    <p class="account-type">{{ acc.type.replace('_', ' ') }}</p>
+                    <h3 class="account-name font-bold text-sm text-primary-color">{{ acc.name }}</h3>
+                    <p class="account-subtag text-xs text-muted font-medium">{{ formatAccountSubtag(acc) }}</p>
                   </div>
                 </div>
-                <div class="account-actions">
-                  <button @click="openTransaction(acc)" class="action-btn action-btn--add" title="Add Transaction">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                    </svg>
+
+                <!-- ••• Menu Button Dropdown -->
+                <div class="relative">
+                  <button @click.stop="toggleAccountMenu(acc.id)" class="menu-dots-btn" title="Account Options">
+                    •••
                   </button>
-                  <button @click="openModal(acc)" class="action-btn action-btn--edit" title="Edit">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button @click="toggleArchive(acc)" class="action-btn action-btn--archive" title="Archive">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                    </svg>
-                  </button>
+
+                  <div v-if="activeMenuId === acc.id" class="account-dropdown-menu" @click.stop>
+                    <button @click="openTransaction(acc); activeMenuId = null" class="dropdown-item">
+                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Transaction
+                    </button>
+                    <button @click="openModal(acc); activeMenuId = null" class="dropdown-item">
+                      <svg class="w-4 h-4 text-secondary-color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit Account
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button @click="toggleArchive(acc); activeMenuId = null" class="dropdown-item dropdown-item--danger">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                      </svg>
+                      Archive Account
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div class="account-balance-section">
-                <p class="balance-label">Current Balance</p>
-                <p class="balance-value tabular-nums" :class="acc.balance >= 0 ? 'amount-positive' : 'amount-negative'">
+              <!-- Balance Section -->
+              <div class="account-balance-section mt-4">
+                <p class="balance-label uppercase text-[10px] tracking-wider font-bold text-muted">
+                  {{ acc.type === 'credit_card' ? 'Used Credit' : 'Balance' }}
+                </p>
+                <p class="balance-value tabular-nums font-extrabold text-2xl" :class="acc.balance >= 0 ? 'amount-positive' : 'amount-negative'">
                   {{ formatCurrency(acc.balance) }}
                 </p>
               </div>
 
-              <!-- Proportion Bar -->
-              <div class="proportion-bar-wrapper">
+              <!-- Credit Card Gauge OR Proportion Bar -->
+              <div v-if="acc.type === 'credit_card'" class="credit-gauge-section mt-3">
+                <div class="flex justify-between text-xs font-semibold text-muted mb-1">
+                  <span>{{ getCreditUsedPct(acc) }}% used</span>
+                  <span>{{ formatCurrency(getCreditAvailable(acc)) }} left</span>
+                </div>
+                <div class="proportion-bar-wrapper">
+                  <div class="proportion-bar" :style="{ width: getCreditUsedPct(acc) + '%', backgroundColor: acc.color }"></div>
+                </div>
+              </div>
+              <div v-else class="proportion-bar-wrapper mt-4">
                 <div class="proportion-bar" :style="{ width: getProportion(acc) + '%', backgroundColor: acc.color }"></div>
               </div>
             </div>
@@ -215,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, inject, defineComponent, h, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, inject, defineComponent, h, watch } from 'vue'
 import axios from 'axios'
 import TransactionModal from './TransactionModal.vue'
 
@@ -232,6 +282,38 @@ const showArchived = ref(false)
 
 const showTransactionModal = ref(false)
 const quickTransactionAccountId = ref('')
+const activeMenuId = ref(null)
+
+function toggleAccountMenu(id) {
+  activeMenuId.value = activeMenuId.value === id ? null : id
+}
+
+function formatAccountSubtag(acc) {
+  const typeMap = {
+    bank: 'Debit • PHP',
+    savings: 'Savings • PHP',
+    credit_card: 'Credit • PHP',
+    cash: 'Cash • PHP',
+    other: 'Wallet • PHP'
+  }
+  return typeMap[acc.type] || `${acc.type.replace('_', ' ')} • PHP`
+}
+
+function getCreditLimit(acc) {
+  return parseFloat(acc.credit_limit || 50000)
+}
+
+function getCreditUsedPct(acc) {
+  const limit = getCreditLimit(acc)
+  const used = Math.abs(parseFloat(acc.balance) || 0)
+  return Math.min(Math.round((used / limit) * 100), 100)
+}
+
+function getCreditAvailable(acc) {
+  const limit = getCreditLimit(acc)
+  const used = Math.abs(parseFloat(acc.balance) || 0)
+  return Math.max(limit - used, 0)
+}
 
 const colorPalette = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#f59e0b','#22c55e','#10b981','#06b6d4','#3b82f6','#64748b','#0ea5e9']
 const bankKeywords = [
@@ -449,7 +531,18 @@ async function toggleArchive(acc) {
   }
 }
 
-onMounted(fetchAccounts)
+function closeMenuOnClickOutside() {
+  activeMenuId.value = null
+}
+
+onMounted(() => {
+  fetchAccounts()
+  window.addEventListener('click', closeMenuOnClickOutside)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeMenuOnClickOutside)
+})
 </script>
 
 <style scoped>
@@ -810,4 +903,145 @@ onMounted(fetchAccounts)
 .text-secondary-color { color: var(--text-secondary); }
 .text-primary-color { color: var(--primary); }
 .label-no-mb { margin-bottom: 0; }
+
+/* ── Summary Hero Card ────────────────────────────────────── */
+.summary-hero-card {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  background: var(--bg-glass);
+}
+
+.summary-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .summary-hero-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.summary-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.summary-value {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0.25rem 0 0;
+  letter-spacing: -0.02em;
+}
+
+.summary-subtext {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 0;
+}
+
+.summary-breakdown {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.summary-box {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  padding: 0.625rem 1rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+}
+
+.box-label {
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.box-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-top: 0.125rem;
+}
+
+/* ── Menu Dots & Popup Dropdown ─────────────────────────────── */
+.menu-dots-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.menu-dots-btn:hover {
+  background-color: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.account-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.375rem;
+  width: 170px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow-md);
+  padding: 0.375rem;
+  z-index: 40;
+  animation: slide-up 0.15s ease-out;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.12s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-surface-2);
+}
+
+.dropdown-item--danger {
+  color: var(--danger);
+}
+
+.dropdown-item--danger:hover {
+  background-color: var(--danger-light);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.25rem 0;
+}
 </style>

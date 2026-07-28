@@ -20,6 +20,11 @@ class CategoryController extends AbstractController
     {
         $categories = $request->user()
             ->categories()
+            ->withCount('transactions')
+            ->withSum(['transactions as monthly_spend' => function ($query) {
+                $query->whereMonth('date', now()->month)
+                      ->whereYear('date', now()->year);
+            }], 'amount')
             ->orderBy('type')
             ->orderBy('name')
             ->get();

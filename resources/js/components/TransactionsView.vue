@@ -31,21 +31,47 @@
 
     <!-- Filters -->
     <div class="filter-panel">
-      <input
-        v-model="filters.search"
-        @input="debouncedFetch"
-        type="text"
-        placeholder="Search description..."
-        class="input-field filter-search"
-      />
+      <!-- Search with Prefix Icon & Clear Button -->
+      <div class="search-input-wrapper">
+        <svg class="search-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          v-model="filters.search"
+          @input="debouncedFetch"
+          type="text"
+          placeholder="Search description..."
+          class="input-field filter-search"
+        />
+        <button v-if="filters.search" @click="clearSearch" class="clear-search-btn" title="Clear">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Type Filter -->
       <select v-model="filters.type" @change="fetchTransactions" class="input-field filter-select">
         <option value="">All Types</option>
         <option value="income">Income</option>
         <option value="expense">Expense</option>
         <option value="transfer">Transfer</option>
       </select>
-      <input v-model="filters.from" @change="fetchTransactions" type="date" class="input-field filter-date" />
-      <input v-model="filters.to"   @change="fetchTransactions" type="date" class="input-field filter-date" />
+
+      <!-- Account Filter -->
+      <select v-model="filters.account_id" @change="fetchTransactions" class="input-field filter-select">
+        <option value="">All Accounts</option>
+        <option v-for="acc in accounts" :key="acc.id" :value="acc.id">
+          {{ acc.name }}
+        </option>
+      </select>
+
+      <!-- Date Filters -->
+      <div class="flex items-center gap-2">
+        <input v-model="filters.from" @change="fetchTransactions" type="date" class="input-field filter-date" title="From Date" />
+        <span class="text-xs text-muted">-</span>
+        <input v-model="filters.to"   @change="fetchTransactions" type="date" class="input-field filter-date" title="To Date" />
+      </div>
     </div>
 
     <!-- Table -->
@@ -71,6 +97,7 @@
             v-for="txn in transactions"
             :key="txn.id"
             class="table-row"
+            :class="txn.type === 'income' ? 'row-income' : txn.type === 'expense' ? 'row-expense' : 'row-transfer'"
           >
             <td class="td td--muted">{{ formatDate(txn.date) }}</td>
             <td class="td">
@@ -112,14 +139,19 @@
       </table>
 
       <!-- Pagination -->
-      <div v-if="pagination.last_page > 1" class="pagination">
-        <span class="pagination-info">Page {{ pagination.current_page }} of {{ pagination.last_page }}</span>
-        <div class="pagination-btns">
+      <div class="pagination flex items-center justify-between">
+        <span class="pagination-info">
+          Showing <strong class="text-primary-color">{{ pagination.from || 0 }}–{{ pagination.to || 0 }}</strong> of <strong class="text-primary-color">{{ pagination.total || 0 }}</strong> transactions
+        </span>
+        <div v-if="pagination.last_page > 1" class="pagination-btns">
           <button
             :disabled="!pagination.prev_page_url"
             @click="goPage(pagination.current_page - 1)"
             class="btn-ghost pagination-btn"
           >← Prev</button>
+          <span class="px-2 py-1 text-xs text-muted font-medium self-center">
+            Page {{ pagination.current_page }} of {{ pagination.last_page }}
+          </span>
           <button
             :disabled="!pagination.next_page_url"
             @click="goPage(pagination.current_page + 1)"
@@ -156,13 +188,14 @@ const emit         = defineEmits(['refresh'])
 const toast        = inject('toast')
 const loading      = ref(true)
 const transactions = ref([])
+const accounts     = ref([])
 const pagination   = ref({})
 const showModal    = ref(false)
 const showTrashModal = ref(false)
 const editingTxn   = ref(null)
 let searchTimeout  = null
 
-const filters = reactive({ search: '', type: '', from: '', to: '', page: 1 })
+const filters = reactive({ search: '', type: '', account_id: '', from: '', to: '', page: 1 })
 
 function formatCurrency(v) {
   return new Intl.NumberFormat('en-PH', {
@@ -182,15 +215,25 @@ function txnBadgeClass(type) {
   return 'badge badge-primary'
 }
 
+async function fetchAccounts() {
+  try {
+    const { data } = await axios.get('/api/accounts')
+    accounts.value = data
+  } catch (e) {
+    console.error('Failed to load accounts for filter', e)
+  }
+}
+
 async function fetchTransactions() {
   loading.value = true
   try {
     const params = {}
-    if (filters.search)   params.search = filters.search
-    if (filters.type)     params.type   = filters.type
-    if (filters.from)     params.from   = filters.from
-    if (filters.to)       params.to     = filters.to
-    if (filters.page > 1) params.page   = filters.page
+    if (filters.search)     params.search     = filters.search
+    if (filters.type)       params.type       = filters.type
+    if (filters.account_id) params.account_id = filters.account_id
+    if (filters.from)       params.from       = filters.from
+    if (filters.to)         params.to         = filters.to
+    if (filters.page > 1)   params.page       = filters.page
 
     const { data } = await axios.get('/api/transactions', { params })
     transactions.value = data.data
@@ -205,6 +248,11 @@ async function fetchTransactions() {
 function debouncedFetch() {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(fetchTransactions, 400)
+}
+
+function clearSearch() {
+  filters.search = ''
+  fetchTransactions()
 }
 
 function goPage(page) {
@@ -251,7 +299,10 @@ async function exportCsv() {
   }
 }
 
-onMounted(fetchTransactions)
+onMounted(() => {
+  fetchAccounts()
+  fetchTransactions()
+})
 </script>
 
 <style scoped>
@@ -308,6 +359,44 @@ onMounted(fetchTransactions)
 
 @media (min-width: 640px)  { .filter-panel { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 1280px) { .filter-panel { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.filter-search {
+  padding-left: 2.25rem;
+  padding-right: 2rem;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+}
+.clear-search-btn:hover { color: var(--text-primary); background: var(--bg-surface-2); }
+
+/* Row Accent Borders */
+.row-income   { border-left: 3px solid var(--success); }
+.row-expense  { border-left: 3px solid var(--danger); }
+.row-transfer { border-left: 3px solid var(--primary); }
 
 /* ── Table Card ───────────────────────────────────────────── */
 .table-card {

@@ -175,7 +175,7 @@
         <div class="glass-card panel">
           <h2 class="panel-title">Recent Transactions</h2>
           <div class="txn-list">
-            <div v-for="txn in data.recent_transactions" :key="txn.id" class="txn-row">
+            <div v-for="txn in (data.recent_transactions || []).slice(0, 4)" :key="txn.id" class="txn-row">
               <div class="txn-icon"
                 :class="txn.type === 'income' ? 'txn-icon--income' : txn.type === 'expense' ? 'txn-icon--expense' : 'txn-icon--transfer'">
                 <!-- Income arrow up -->
@@ -210,6 +210,11 @@
             <div v-if="!data.recent_transactions?.length" class="empty-state empty-state--sm">
               <p class="empty-text">No transactions yet</p>
             </div>
+            <div v-else-if="data.recent_transactions?.length > 4" class="mt-2 pt-2 border-t border-border flex justify-center">
+              <button @click="emit('navigate', 'transactions')" class="btn-ghost text-xs w-full justify-center">
+                View all transactions →
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -225,6 +230,7 @@ import { Chart, registerables } from 'chart.js'
 
 Chart.register(...registerables)
 
+const emit = defineEmits(['navigate'])
 const toast = inject('toast')
 
 const props = defineProps({
@@ -477,10 +483,13 @@ onMounted(fetchDashboard)
 
 .stat-card--hero {
   grid-column: 1 / -1;
+  background-color: var(--bg-surface);
   background: linear-gradient(145deg, var(--bg-surface-2) 0%, var(--bg-glass) 100%);
   border: 1px solid var(--border-strong);
   padding: 2rem;
   gap: 0.75rem;
+  isolation: isolate;
+  transform: translateZ(0);
 }
 
 .stat-card--hero .stat-value {

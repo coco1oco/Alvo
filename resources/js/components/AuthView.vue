@@ -1,171 +1,253 @@
 <template>
   <div class="auth-page">
-    <!-- LEFT PANEL: Brand Stage -->
+    <!-- LEFT PANEL: Brand Experience -->
     <div class="brand-stage">
-      <!-- Base Layer / Noise -->
       <div class="noise-overlay"></div>
-      
-      <!-- Gradient Blobs -->
-      <div class="stage-blobs">
-        <div class="blob blob-primary"></div>
-        <div class="blob blob-success"></div>
-      </div>
+      <div class="brand-glow"></div>
 
-      <!-- Floating Balance Card -->
-      <div class="floating-card-wrapper">
-        <div class="glass-card demo-card">
-          <div class="demo-card-header">
-            <span class="demo-dots">••• 4209</span>
-            <span class="badge badge-success">+12.4%</span>
-          </div>
-          <p class="demo-label">Total Balance</p>
-          <h2 class="demo-balance tabular-nums">₱184,200.00</h2>
-          
-          <div class="demo-chart">
-            <svg viewBox="0 0 100 30" class="sparkline" preserveAspectRatio="none">
-              <path class="sparkline-path" d="M0,25 C20,20 30,30 40,15 C50,0 70,20 80,10 C90,0 100,5 100,5" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
+      <!-- Wordmark -->
+      <div class="brand-top">
+        <div class="brand-mark">
+          <img :src="'/logo-dark.svg'" alt="Alvo" class="brand-mark-img" />
+          <span class="brand-mark-name">Alvo</span>
         </div>
       </div>
 
-      <!-- Brand Content -->
-      <div class="brand-content">
-        <div class="brand-logo">
-          <img :src="isDark ? '/logo-dark.svg' : '/logo.svg'" alt="Logo" class="w-10 h-10 drop-shadow-md" />
-          <h1 class="brand-name">Alvo</h1>
-        </div>
-        <h2 class="brand-tagline">Aim. Save. Achieve.</h2>
-        
-        <!-- Trust badges -->
-        <div class="trust-badges">
-          <span class="trust-badge">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-            256-bit encryption
-          </span>
-          <span class="trust-badge">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Zero hidden fees
-          </span>
-        </div>
+      <!-- Abstract Visual -->
+      <div class="brand-visual">
+        <svg class="orbital-svg" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ga" x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#D97757"/>
+              <stop offset="100%" stop-color="#D97757" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="gb" x1="300" y1="0" x2="0" y2="300" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#788C5D"/>
+              <stop offset="100%" stop-color="#788C5D" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Static rings -->
+          <circle cx="150" cy="150" r="130" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+          <circle cx="150" cy="150" r="95"  stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+          <circle cx="150" cy="150" r="58"  stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <!-- Animated arcs -->
+          <circle class="arc-a" cx="150" cy="150" r="130"
+            stroke="url(#ga)" stroke-width="1.5"
+            stroke-dasharray="175 642" stroke-linecap="round"/>
+          <circle class="arc-b" cx="150" cy="150" r="95"
+            stroke="url(#gb)" stroke-width="1.5"
+            stroke-dasharray="100 497" stroke-linecap="round"/>
+          <!-- Cardinal ticks -->
+          <line x1="150" y1="19"  x2="150" y2="28"  stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="281" y1="150" x2="272" y2="150" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="150" y1="281" x2="150" y2="272" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="19"  y1="150" x2="28"  y2="150" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-linecap="round"/>
+          <!-- Center -->
+          <circle cx="150" cy="150" r="3.5" fill="rgba(255,255,255,0.08)"/>
+          <circle cx="150" cy="150" r="1.5" fill="#D97757"/>
+          <!-- Accent dot (rotates with arc-a) -->
+          <circle class="arc-a" cx="150" cy="20" r="3.5" fill="#D97757"
+            stroke="rgba(14,13,12,0.8)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- Headline Copy -->
+      <div class="brand-copy">
+        <p class="brand-eyebrow">Personal Finance</p>
+        <h1 class="brand-headline">
+          Your finances,<br>
+          <em class="brand-em">at a glance.</em>
+        </h1>
+
       </div>
     </div>
 
-    <!-- RIGHT PANEL: Auth Zone -->
+    <!-- RIGHT PANEL: Authentication Panel -->
     <div class="auth-zone">
-      <div class="auth-form-container">
-        <!-- We mount Clerk's SignIn component -->
-        <SignIn :appearance="clerkAppearance" />
+      <div class="auth-card-container">
+        <!-- Custom Header -->
+        <div class="auth-header">
+          <h3 class="auth-welcome-title">
+            {{ isAuthenticating || isSignedIn ? 'Authenticating...' : (isSignUp ? 'Create your account' : 'Welcome Back') }}
+          </h3>
+          <p class="auth-welcome-subtitle">
+            {{ isAuthenticating || isSignedIn ? 'Verifying credentials & preparing your dashboard.' : (isSignUp ? 'Join Alvo to start tracking your finances.' : 'Sign in to continue managing your finances.') }}
+          </p>
+        </div>
+
+        <!-- Clerk Component with Custom Appearance Overrides OR Loader -->
+        <div class="auth-component-wrapper">
+          <div v-if="isAuthenticating || isSignedIn" class="auth-loading-card">
+            <div class="spinner"></div>
+            <p class="text-xs font-semibold text-muted mt-3">Setting up workspace...</p>
+          </div>
+          <template v-else>
+            <SignIn 
+              v-if="!isSignUp" 
+              routing="virtual" 
+              :appearance="clerkAppearance" 
+            />
+            <SignUp 
+              v-else 
+              routing="virtual" 
+              :appearance="clerkAppearance" 
+            />
+          </template>
+        </div>
+
+        <!-- Custom Mode Switcher Link -->
+        <div v-if="!isAuthenticating && !isSignedIn" class="auth-mode-footer">
+          <p v-if="!isSignUp" class="mode-text">
+            Don't have an account?
+            <button type="button" @click="isSignUp = true" class="mode-link">
+              Create one →
+            </button>
+          </p>
+          <p v-else class="mode-text">
+            Already have an account?
+            <button type="button" @click="isSignUp = false" class="mode-link">
+              Sign in →
+            </button>
+          </p>
+        </div>
+
+        <!-- Custom Minimal SaaS Footer -->
+        <div class="custom-saas-footer">
+          <span class="powered-by">Powered by <strong>Clerk</strong></span>
+          <div class="footer-links">
+            <a href="#" class="footer-link">Privacy</a>
+            <span class="link-dot">•</span>
+            <a href="#" class="footer-link">Terms</a>
+            <span class="link-dot">•</span>
+            <a href="#" class="footer-link">Status</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { inject, computed } from 'vue'
-import { SignIn } from '@clerk/vue'
+import { inject, ref, computed, watch } from 'vue'
+import { SignIn, SignUp, useAuth } from '@clerk/vue'
 import { dark } from '@clerk/themes'
 
 const isDark = inject('isDark')
 
+const isSignUp = ref(false)
+const isAuthenticating = ref(false)
+
+const { isSignedIn } = useAuth()
+
+watch(isSignedIn, (signedIn) => {
+  if (signedIn) {
+    isAuthenticating.value = true
+  }
+}, { immediate: true })
 
 const clerkAppearance = computed(() => {
   const isDarkMode = isDark.value
   return {
     baseTheme: isDarkMode ? dark : undefined,
     variables: {
-      colorPrimary:        '#D97757',
-      colorBackground:     isDarkMode ? '#1E1E1C' : '#FFFFFF',
-      colorText:           isDarkMode ? '#FAF9F5' : '#141413',
-      colorTextSecondary:  isDarkMode ? '#B0AEA5' : '#B0AEA5',
-      colorInputBackground: isDarkMode ? '#141413' : '#FAF9F5',
-      colorInputText:       isDarkMode ? '#FAF9F5' : '#141413',
+      colorPrimary:        '#E77B57',
+      colorBackground:     'transparent',
+      colorText:           isDarkMode ? '#FAF9F5' : '#18181B',
+      colorTextSecondary:  isDarkMode ? '#A1A1AA' : '#71717A',
+      colorInputBackground: isDarkMode ? '#1E1E1C' : '#FFFFFF',
+      colorInputText:       isDarkMode ? '#FAF9F5' : '#18181B',
       colorDanger:         '#E03131',
       borderRadius:        '0.75rem',
       fontFamily:          'Geist, Inter, sans-serif',
-      spacingUnit:         '1.1rem'
+      spacingUnit:         '1rem'
     },
     layout: {
-      socialButtonsPlacement: 'bottom',
+      socialButtonsPlacement: 'top',
       socialButtonsVariant: 'blockButton',
-      logoPlacement: 'none',
+      logoPlacement: 'none'
     },
     elements: {
-      rootBox:    { width: '100%', display: 'flex', justifyContent: 'center' },
-      cardBox:    { 
+      rootBox: { 
+        width: '100%', 
+        display: 'flex', 
+        justifyContent: 'center',
+        boxShadow: 'none',
+        border: 'none',
+        outline: 'none'
+      },
+      cardBox: { 
         boxShadow: 'none', 
-        border: '0px solid transparent', 
+        border: 'none', 
+        outline: 'none',
         background: 'transparent', 
         padding: '0', 
+        margin: '0',
         width: '100%', 
         maxWidth: '100%',
         borderRadius: '0'
       },
-      headerTitle: { 
-        fontSize: '1.5rem', 
-        fontWeight: '700', 
-        color: isDarkMode ? '#EDEDED' : '#0F1923',
-        letterSpacing: '-0.02em'
+      card: {
+        boxShadow: 'none',
+        border: 'none',
+        outline: 'none',
+        background: 'transparent',
+        padding: '0',
+        margin: '0'
       },
-      headerSubtitle: { 
-        fontSize: '0.875rem', 
-        color: isDarkMode ? '#A1A1AA' : '#5A6478',
-        marginTop: '0.5rem'
-      },
+      header: { display: 'none', margin: '0', padding: '0', height: '0' },
+      headerTitle: { display: 'none' },
+      headerSubtitle: { display: 'none' },
+      socialButtons: { marginTop: '0', paddingTop: '0' },
       socialButtonsBlockButton: {
-        border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
-        backgroundColor: isDarkMode ? '#111111' : '#FFFFFF',
-        color: isDarkMode ? '#EDEDED' : '#0F1923',
+        border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(24,24,27,0.12)',
+        backgroundColor: isDarkMode ? '#1E1E1C' : '#FFFFFF',
+        color: isDarkMode ? '#FAF9F5' : '#18181B',
         borderRadius: '0.75rem',
-        transition: 'all 0.15s',
-        height: '2.75rem',
-        fontWeight: '500'
+        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+        height: '52px',
+        fontWeight: '500',
+        fontSize: '0.9375rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+        width: '100%',
+        marginTop: '0'
       },
       formFieldInput: {
         borderRadius: '0.75rem',
-        borderColor: isDarkMode ? 'rgba(250,249,245,0.1)' : 'rgba(0,0,0,0.1)',
-        backgroundColor: isDarkMode ? '#141413' : '#FAF9F5',
-        height: '2.75rem',
-        color: isDarkMode ? '#EDEDED' : '#0F1923',
-        transition: 'border-color 0.15s'
+        borderColor: isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(24,24,27,0.15)',
+        backgroundColor: isDarkMode ? '#1E1E1C' : '#FFFFFF',
+        height: '52px',
+        padding: '0 1rem',
+        color: isDarkMode ? '#FAF9F5' : '#18181B',
+        fontSize: '0.9375rem',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        width: '100%',
+        boxSizing: 'border-box'
       },
       formButtonPrimary: {
-        height: '2.75rem',
+        height: '52px',
         borderRadius: '0.75rem',
         fontSize: '0.9375rem',
-        fontWeight: '700',
-        color: '#141413',
+        fontWeight: '600',
+        color: '#FFFFFF',
         textTransform: 'none',
-        background: 'linear-gradient(135deg, #D97757, #EDA086)',
-        boxShadow: '0 4px 12px rgba(217,119,87,0.25)',
+        background: 'linear-gradient(135deg, #E77B57, #EDA086)',
+        boxShadow: '0 4px 16px rgba(231,123,87,0.28)',
         border: 'none',
-        transition: 'transform 0.15s, box-shadow 0.15s'
+        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+        width: '100%'
       },
       footer: {
-        background: 'transparent',
-        padding: '0',
-        marginTop: '1.5rem',
-        border: 'none'
-      },
-      footerAction: {
-        background: 'transparent',
-        border: 'none',
-        padding: '0'
-      },
-      footerActionText: {
-        color: isDarkMode ? '#A1A1AA' : '#5A6478',
-      },
-      footerActionLink: {
-        color: isDarkMode ? '#3B82F6' : '#1A56DB',
-        fontWeight: '600'
+        display: 'none'
       },
       dividerLine: {
-        background: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+        background: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(24,24,27,0.1)'
       },
       dividerText: {
-        color: isDarkMode ? '#A1A1AA' : '#5A6478',
+        color: isDarkMode ? '#A1A1AA' : '#71717A',
+        fontSize: '0.75rem',
+        letterSpacing: '0.05em'
       }
-    },
+    }
   }
 })
 </script>
@@ -176,214 +258,310 @@ const clerkAppearance = computed(() => {
   height: 100dvh;
   width: 100%;
   overflow: hidden;
+  background-color: var(--bg-base);
 }
 
-/* ── LEFT PANEL: Brand Stage ───────────────────────────────── */
+/* ── LEFT PANEL ─────────────────────────────────────────────── */
 .brand-stage {
-  flex: 0 0 55%;
+  flex: 0 0 50%;
   position: relative;
-  background-color: #141413; /* Anthropic Dark */
+  background-color: #0C0B0A;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 4rem;
+  justify-content: space-between;
+  padding: 3rem 3.5rem;
   color: #fff;
 }
 
 @media (max-width: 900px) {
-  .brand-stage {
-    display: none; /* Hide left panel on small screens */
-  }
-  .auth-zone {
-    flex: 1 !important;
-  }
+  .brand-stage { display: none; }
+  .auth-zone   { flex: 1 !important; }
 }
 
+/* Grain noise */
 .noise-overlay {
   position: absolute;
   inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   pointer-events: none;
+  z-index: 1;
 }
 
-.stage-blobs {
+/* Single ambient warm glow — restrained, not three blobs */
+.brand-glow {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.blob {
-  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  top: -20%;
+  left: -20%;
   border-radius: 50%;
-  filter: blur(100px);
+  background: radial-gradient(circle, rgba(217,119,87,0.18) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 2;
 }
 
-@keyframes blob-drift {
-  0%   { transform: translate(0, 0)   scale(1); }
-  33%  { transform: translate(30px, -20px) scale(1.05); }
-  66%  { transform: translate(-20px, 15px) scale(0.97); }
-  100% { transform: translate(0, 0)   scale(1); }
-}
-
-.blob-primary {
-  width: 50vw;
-  height: 50vw;
-  top: -10%;
-  left: -10%;
-  background: #D97757;
-  opacity: 0.15;
-  animation: blob-drift 14s ease-in-out infinite;
-}
-
-.blob-success {
-  width: 40vw;
-  height: 40vw;
-  bottom: -10%;
-  right: -10%;
-  background: #788C5D;
-  opacity: 0.15;
-  animation: blob-drift 18s ease-in-out infinite reverse;
-}
-
-/* Floating Card */
-.floating-card-wrapper {
-  position: absolute;
-  top: 20%;
-  right: 15%;
+/* Wordmark row */
+.brand-top {
+  position: relative;
   z-index: 10;
-  animation: float 6s ease-in-out infinite;
-  transform-style: preserve-3d;
 }
 
-@keyframes float {
-  0%   { transform: translateY(0) rotate(-4deg); }
-  50%  { transform: translateY(-15px) rotate(-3deg); }
-  100% { transform: translateY(0) rotate(-4deg); }
-}
-
-.demo-card {
-  background: rgba(30, 30, 28, 0.65) !important;
-  border: 1px solid rgba(250, 249, 245, 0.1) !important;
-  width: 320px;
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
-.demo-card-header {
+.brand-mark {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
 }
 
-.demo-dots {
-  font-size: 0.75rem;
-  color: #A1A1AA;
-  letter-spacing: 2px;
+.brand-mark-img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
 }
 
-.demo-label {
-  font-size: 0.75rem;
-  color: #A1A1AA;
-  text-transform: uppercase;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.demo-balance {
+.brand-mark-name {
   font-size: 2rem;
   font-weight: 700;
-  color: #EDEDED;
-  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.85);
 }
 
-.demo-chart {
-  height: 40px;
-  width: 100%;
+/* Abstract orbital art */
+.brand-visual {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
 }
 
-.sparkline {
-  width: 100%;
-  height: 100%;
+.orbital-svg {
+  width: min(260px, 55%);
+  height: auto;
   overflow: visible;
 }
 
-@keyframes draw-line {
-  from { stroke-dashoffset: 300; }
-  to   { stroke-dashoffset: 0; }
+@keyframes spin-cw {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+@keyframes spin-ccw {
+  from { transform: rotate(0deg);    }
+  to   { transform: rotate(-360deg); }
 }
 
-.sparkline-path {
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  animation: draw-line 2s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+.arc-a {
+  transform-origin: 150px 150px;
+  animation: spin-cw 50s linear infinite;
+}
+.arc-b {
+  transform-origin: 150px 150px;
+  animation: spin-ccw 35s linear infinite;
 }
 
-/* Brand Content */
-.brand-content {
+/* Headline copy */
+.brand-copy {
   position: relative;
   z-index: 10;
-  margin-top: auto;
-  margin-bottom: 4rem;
 }
 
-.brand-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+.brand-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.32);
+  margin: 0 0 1rem 0;
 }
 
-.brand-logo-img {
-  width: 32px;
-  height: 32px;
+.brand-headline {
+  font-size: clamp(2.25rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  margin: 0 0 1rem 0;
+  color: #FFFFFF;
+  font-style: normal;
 }
 
-.brand-name {
-  font-size: 1.5rem;
-  font-weight: 700;
+.brand-em {
+  font-style: italic;
+  background: linear-gradient(120deg, #D97757 0%, #EDA086 60%, #F7C5AE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-caption {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.65;
   margin: 0;
+  font-weight: 400;
 }
 
-.brand-tagline {
-  font-size: 3rem;
-  font-weight: 300;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin: 0 0 2rem 0;
-  max-width: 400px;
-}
 
-.trust-badges {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.trust-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  color: #A1A1AA;
-  font-weight: 500;
-}
-
-/* ── RIGHT PANEL: Auth Zone ────────────────────────────────── */
+/* ── RIGHT PANEL: Authentication Panel ───────────────────────── */
 .auth-zone {
-  flex: 0 0 45%;
+  flex: 0 0 48%;
   background-color: var(--bg-surface);
-  background-image: radial-gradient(rgba(176, 174, 165, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(176, 174, 165, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 10%;
+  padding: 2.5rem 3rem;
   overflow-y: auto;
 }
 
-.auth-form-container {
+.auth-card-container {
   width: 100%;
-  max-width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.auth-header {
+  margin-bottom: 1.5rem;
+}
+
+.auth-welcome-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  margin: 0 0 0.5rem 0;
+}
+
+.auth-welcome-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.auth-component-wrapper {
+  width: 100%;
+}
+
+/* Deep overrides to strip any Clerk container borders, outlines, and shadows */
+:deep(.cl-rootBox),
+:deep(.cl-cardBox),
+:deep(.cl-card),
+:deep(.cl-main) {
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+:deep(.cl-header),
+:deep(.cl-headerTitle),
+:deep(.cl-headerSubtitle) {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+}
+
+:deep(.cl-socialButtons) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+:deep(.cl-formFieldInput),
+:deep(.cl-input),
+:deep(.cl-formFieldInputGroup) {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 0.75rem !important;
+  overflow: visible !important;
+}
+
+:deep(.cl-formFieldRow),
+:deep(.cl-formField) {
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.auth-mode-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.mode-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.mode-link {
+  background: none;
+  border: none;
+  color: #E77B57;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-left: 0.25rem;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+
+.mode-link:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+/* Custom Minimal Footer */
+.custom-saas-footer {
+  margin-top: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+}
+
+.powered-by strong {
+  color: var(--text-secondary);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-link:hover {
+  color: var(--text-secondary);
+}
+
+.auth-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  text-align: center;
+}
+
+.link-dot {
+  opacity: 0.5;
 }
 </style>
