@@ -18,20 +18,21 @@
       <!-- ── Stat Cards ────────────────────────────────────────── -->
       <div class="stat-grid">
 
-        <!-- Net Worth -->
-        <div class="glass-card stat-card">
+        <!-- Net Worth (Hero Stat) -->
+        <div class="glass-card stat-card stat-card--hero">
           <div class="stat-header">
             <span class="stat-label">Net Worth</span>
-            <div class="stat-icon">
-              <svg class="stat-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-            </div>
+            <span class="badge badge-success">+8.3%</span>
           </div>
           <p class="stat-value tabular-nums" :class="data.total_balance >= 0 ? 'amount-positive' : 'amount-negative'">
             {{ formatCurrency(data.total_balance) }}
           </p>
+          <div class="hero-sparkline">
+            <!-- Simple CSS sparkline representation or placeholder -->
+            <svg viewBox="0 0 100 20" class="sparkline" preserveAspectRatio="none">
+              <path d="M0,15 C20,10 30,20 40,5 C50,-5 70,15 80,5 C90,-5 100,5 100,5" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
           <p class="stat-note">Across all accounts</p>
         </div>
 
@@ -147,7 +148,7 @@
           <div class="budget-list">
             <div v-for="b in data.budgets" :key="b.id" class="budget-item">
               <div class="budget-row">
-                <span class="budget-name">{{ b.category }}</span>
+                <span class="budget-name">{{ b.category?.name || b.category }}</span>
                 <span class="budget-pct"
                   :class="b.percentage > 100 ? 'badge badge-danger' : b.percentage > 80 ? 'badge badge-warning' : 'badge badge-success'">
                   {{ b.percentage }}%
@@ -287,25 +288,43 @@ function renderCharts() {
   if (cashflowChart.value && data.value.cashflow?.length) {
     if (cashflowInstance) cashflowInstance.destroy()
     cashflowInstance = new Chart(cashflowChart.value, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: data.value.cashflow.map(c => c.label),
         datasets: [
           {
             label: 'Income',
             data: data.value.cashflow.map(c => c.income),
-            backgroundColor: 'rgba(18, 161, 121, 0.7)',
-            borderColor: '#12A179',
-            borderWidth: 1,
-            borderRadius: 5,
+            backgroundColor: (context) => {
+              const ctx = context.chart.ctx;
+              const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+              gradient.addColorStop(0, 'rgba(120, 140, 93, 0.4)');
+              gradient.addColorStop(1, 'rgba(120, 140, 93, 0)');
+              return gradient;
+            },
+            borderColor: 'var(--success)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
           },
           {
             label: 'Expenses',
             data: data.value.cashflow.map(c => c.expense),
-            backgroundColor: 'rgba(224, 49, 49, 0.7)',
-            borderColor: '#E03131',
-            borderWidth: 1,
-            borderRadius: 5,
+            backgroundColor: (context) => {
+              const ctx = context.chart.ctx;
+              const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+              gradient.addColorStop(0, 'rgba(224, 49, 49, 0.4)');
+              gradient.addColorStop(1, 'rgba(224, 49, 49, 0)');
+              return gradient;
+            },
+            borderColor: 'var(--danger)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
           },
         ],
       },
@@ -320,7 +339,7 @@ function renderCharts() {
         scales: {
           x: {
             ticks: { color: colors.tick, font: { size: 10 } },
-            grid: { color: colors.grid },
+            grid: { display: false },
           },
           y: {
             ticks: {
@@ -330,6 +349,16 @@ function renderCharts() {
             },
             grid: { color: colors.grid },
           },
+        },
+        animation: {
+          y: {
+            duration: 1000,
+            easing: 'easeOutQuart',
+          }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
         },
       },
     })
@@ -368,10 +397,24 @@ function renderCharts() {
   }
 }
 
-// Re-render charts when theme changes
+// Update chart colors when theme changes without re-triggering animations
 watch(() => props.isDark, async () => {
   await nextTick()
-  renderCharts()
+  const colors = chartColors()
+  
+  if (cashflowInstance) {
+    cashflowInstance.options.plugins.legend.labels.color = colors.legend
+    cashflowInstance.options.scales.x.ticks.color = colors.tick
+    if (cashflowInstance.options.scales.x.grid) cashflowInstance.options.scales.x.grid.color = colors.grid
+    cashflowInstance.options.scales.y.ticks.color = colors.tick
+    if (cashflowInstance.options.scales.y.grid) cashflowInstance.options.scales.y.grid.color = colors.grid
+    cashflowInstance.update('none')
+  }
+  
+  if (donutInstance) {
+    donutInstance.options.plugins.legend.labels.color = colors.legend
+    donutInstance.update('none')
+  }
 })
 
 onMounted(fetchDashboard)
@@ -420,7 +463,7 @@ onMounted(fetchDashboard)
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 640px)  { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -430,6 +473,31 @@ onMounted(fetchDashboard)
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.stat-card--hero {
+  grid-column: 1 / -1;
+  background: linear-gradient(145deg, var(--bg-surface-2) 0%, var(--bg-glass) 100%);
+  border: 1px solid var(--border-strong);
+  padding: 2rem;
+  gap: 0.75rem;
+}
+
+.stat-card--hero .stat-value {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-sparkline {
+  height: 30px;
+  width: 150px;
+  margin: 0.5rem 0;
+}
+
+.sparkline {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .stat-header {
