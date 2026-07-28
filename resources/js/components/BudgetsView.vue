@@ -31,10 +31,52 @@
       </div>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="loading-state">
-      <div class="spinner"></div>
-    </div>
+    <!-- Skeleton Loading -->
+    <template v-if="loading">
+      <!-- Summary banner skeleton -->
+      <div class="glass-card budget-summary-banner mb-6 sk-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+          <div style="display:flex;align-items:center;gap:0.875rem">
+            <div class="skeleton" style="width:2.75rem;height:2.75rem;border-radius:0.75rem;flex-shrink:0"></div>
+            <div style="display:flex;flex-direction:column;gap:0.375rem">
+              <div class="skeleton" style="width:10rem;height:0.875rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:14rem;height:0.75rem;border-radius:0.375rem"></div>
+            </div>
+          </div>
+          <div style="flex:1;max-width:16rem;display:flex;flex-direction:column;gap:0.5rem">
+            <div style="display:flex;justify-content:space-between">
+              <div class="skeleton" style="width:7rem;height:0.75rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:2.5rem;height:0.75rem;border-radius:0.375rem"></div>
+            </div>
+            <div class="skeleton" style="width:100%;height:0.5rem;border-radius:999px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget cards skeleton -->
+      <div class="budgets-grid sk-card">
+        <div v-for="i in 4" :key="i" class="glass-card budget-card">
+          <!-- Header: icon + name + badge -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <div style="display:flex;align-items:center;gap:0.625rem">
+              <div class="skeleton" style="width:2rem;height:2rem;border-radius:0.625rem;flex-shrink:0"></div>
+              <div class="skeleton" style="width:6rem;height:0.875rem;border-radius:0.375rem"></div>
+            </div>
+            <div class="skeleton" style="width:3rem;height:1.375rem;border-radius:999px"></div>
+          </div>
+          <!-- Fuel gauge arc placeholder -->
+          <div class="skeleton" style="width:7rem;height:7rem;border-radius:50%;margin:0 auto 1rem"></div>
+          <!-- Progress bar -->
+          <div class="skeleton" style="width:100%;height:0.5rem;border-radius:999px;margin-bottom:0.75rem"></div>
+          <!-- Amounts -->
+          <div style="display:flex;justify-content:space-between">
+            <div class="skeleton" style="width:5rem;height:0.75rem;border-radius:0.375rem"></div>
+            <div class="skeleton" style="width:4rem;height:0.75rem;border-radius:0.375rem"></div>
+          </div>
+        </div>
+      </div>
+    </template>
+
 
     <template v-else-if="budgets.length">
       <!-- Summary Status Header Banner -->
@@ -374,12 +416,7 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.loading-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 12rem;
-}
+.sk-card { pointer-events: none; }
 
 /* ── Budgets Grid ─────────────────────────────────────────── */
 .budgets-grid {

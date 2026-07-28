@@ -14,10 +14,53 @@
       </button>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="loading-state">
-      <div class="spinner"></div>
-    </div>
+    <!-- Skeleton Loading -->
+    <template v-if="loading">
+      <!-- Summary Hero skeleton -->
+      <div class="glass-card summary-hero-card mb-6 sk-card">
+        <div class="summary-hero-content">
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <div class="skeleton" style="width:6rem;height:0.75rem;border-radius:0.375rem"></div>
+            <div class="skeleton" style="width:11rem;height:2rem;border-radius:0.5rem"></div>
+            <div class="skeleton" style="width:9rem;height:0.75rem;border-radius:0.375rem"></div>
+          </div>
+          <div class="summary-breakdown">
+            <div class="summary-box" style="gap:0.4rem;display:flex;flex-direction:column">
+              <div class="skeleton" style="width:3.5rem;height:0.75rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:6rem;height:1.125rem;border-radius:0.375rem"></div>
+            </div>
+            <div class="summary-box" style="gap:0.4rem;display:flex;flex-direction:column">
+              <div class="skeleton" style="width:4.5rem;height:0.75rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:6rem;height:1.125rem;border-radius:0.375rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account groups skeleton -->
+      <div class="account-groups-container sk-card">
+        <div v-for="group in 2" :key="group" class="account-group">
+          <div class="skeleton" style="width:7rem;height:0.875rem;border-radius:0.375rem;margin-bottom:0.75rem"></div>
+          <div class="accounts-grid">
+            <div v-for="card in 2" :key="card" class="glass-card account-card" style="display:flex;flex-direction:column;gap:0.875rem">
+              <!-- Top row: icon + name -->
+              <div style="display:flex;align-items:center;gap:0.75rem">
+                <div class="skeleton" style="width:2.5rem;height:2.5rem;border-radius:0.75rem;flex-shrink:0"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:0.375rem">
+                  <div class="skeleton" style="width:60%;height:0.875rem;border-radius:0.375rem"></div>
+                  <div class="skeleton" style="width:40%;height:0.75rem;border-radius:0.375rem"></div>
+                </div>
+              </div>
+              <!-- Balance line -->
+              <div class="skeleton" style="width:55%;height:1.5rem;border-radius:0.5rem"></div>
+              <!-- Bar -->
+              <div class="skeleton" style="width:100%;height:0.375rem;border-radius:999px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
 
     <template v-else>
       <!-- Total Net Worth Summary Banner -->
@@ -575,12 +618,7 @@ onUnmounted(() => {
   margin: 0.25rem 0 0;
 }
 
-.loading-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 12rem;
-}
+.sk-card { pointer-events: none; }
 
 /* ── Accounts Grid ────────────────────────────────────────── */
 .accounts-grid {

@@ -8,10 +8,57 @@
       </div>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="dashboard-loading">
-      <div class="spinner"></div>
+    <!-- Skeleton Loading -->
+    <div v-if="loading" class="dashboard-body">
+      <!-- Stat Cards skeleton -->
+      <div class="stat-grid">
+        <div class="glass-card stat-card stat-card--hero sk-card">
+          <div class="sk-row" style="margin-bottom:0.75rem">
+            <div class="skeleton" style="width:5rem;height:0.75rem;border-radius:0.375rem"></div>
+            <div class="skeleton" style="width:3.5rem;height:1.25rem;border-radius:999px"></div>
+          </div>
+          <div class="skeleton" style="width:70%;height:2.25rem;border-radius:0.5rem;margin-bottom:0.5rem"></div>
+          <div class="skeleton" style="width:100%;height:1.75rem;border-radius:0.375rem;margin-bottom:0.5rem"></div>
+          <div class="skeleton" style="width:8rem;height:0.75rem;border-radius:0.375rem"></div>
+        </div>
+        <div v-for="i in 3" :key="i" class="glass-card stat-card sk-card">
+          <div class="sk-row" style="margin-bottom:0.75rem">
+            <div class="skeleton" style="width:4rem;height:0.75rem;border-radius:0.375rem"></div>
+            <div class="skeleton" style="width:2rem;height:2rem;border-radius:0.625rem"></div>
+          </div>
+          <div class="skeleton" style="width:65%;height:1.75rem;border-radius:0.5rem;margin-bottom:0.5rem"></div>
+          <div class="skeleton" style="width:5rem;height:0.75rem;border-radius:0.375rem"></div>
+        </div>
+      </div>
+
+      <!-- Charts skeleton -->
+      <div class="charts-grid">
+        <div class="glass-card chart-card chart-card--wide sk-card">
+          <div class="skeleton" style="width:9rem;height:1rem;border-radius:0.375rem;margin-bottom:1.25rem"></div>
+          <div class="skeleton" style="width:100%;height:10rem;border-radius:0.75rem"></div>
+        </div>
+        <div class="glass-card chart-card sk-card">
+          <div class="skeleton" style="width:9rem;height:1rem;border-radius:0.375rem;margin-bottom:1.25rem"></div>
+          <div class="skeleton" style="width:9rem;height:9rem;border-radius:50%;margin:0 auto"></div>
+        </div>
+      </div>
+
+      <!-- Bottom panels skeleton -->
+      <div class="bottom-grid">
+        <div v-for="panel in 3" :key="panel" class="glass-card panel sk-card">
+          <div class="skeleton" style="width:8rem;height:1rem;border-radius:0.375rem;margin-bottom:1.25rem"></div>
+          <div v-for="row in 4" :key="row" class="sk-row" style="margin-bottom:0.875rem;align-items:center">
+            <div class="skeleton" style="width:2rem;height:2rem;border-radius:0.625rem;flex-shrink:0"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:0.3rem">
+              <div class="skeleton" style="width:70%;height:0.75rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:45%;height:0.625rem;border-radius:0.375rem"></div>
+            </div>
+            <div class="skeleton" style="width:4rem;height:0.875rem;border-radius:0.375rem"></div>
+          </div>
+        </div>
+      </div>
     </div>
+
 
     <div v-else class="dashboard-body">
 
@@ -452,11 +499,14 @@ onMounted(fetchDashboard)
   margin: 0.25rem 0 0;
 }
 
-.dashboard-loading {
+.sk-card {
+  pointer-events: none;
+}
+.sk-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 16rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .dashboard-body {

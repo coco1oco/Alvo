@@ -12,7 +12,61 @@
       </button>
     </div>
 
+    <!-- Skeleton Loading -->
+    <template v-if="loading">
+      <!-- Income skeleton -->
+      <section>
+        <div class="section-heading section-heading--income">
+          <span class="section-dot section-dot--income"></span>
+          Income
+        </div>
+        <div class="categories-grid">
+          <div v-for="i in 4" :key="i" class="glass-card category-card" style="pointer-events:none">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem">
+              <div class="skeleton" style="width:2.5rem;height:2.5rem;border-radius:0.75rem"></div>
+              <div style="display:flex;gap:0.375rem">
+                <div class="skeleton" style="width:1.5rem;height:1.5rem;border-radius:0.5rem"></div>
+                <div class="skeleton" style="width:1.5rem;height:1.5rem;border-radius:0.5rem"></div>
+              </div>
+            </div>
+            <div class="skeleton" style="width:65%;height:0.875rem;border-radius:0.375rem;margin-bottom:0.5rem"></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem">
+              <div class="skeleton" style="width:4rem;height:0.75rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:3.5rem;height:0.75rem;border-radius:0.375rem"></div>
+            </div>
+            <div class="skeleton" style="width:100%;height:0.25rem;border-radius:999px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Expense skeleton -->
+      <section>
+        <div class="section-heading section-heading--expense">
+          <span class="section-dot section-dot--expense"></span>
+          Expense
+        </div>
+        <div class="categories-grid">
+          <div v-for="i in 4" :key="i" class="glass-card category-card" style="pointer-events:none">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem">
+              <div class="skeleton" style="width:2.5rem;height:2.5rem;border-radius:0.75rem"></div>
+              <div style="display:flex;gap:0.375rem">
+                <div class="skeleton" style="width:1.5rem;height:1.5rem;border-radius:0.5rem"></div>
+                <div class="skeleton" style="width:1.5rem;height:1.5rem;border-radius:0.5rem"></div>
+              </div>
+            </div>
+            <div class="skeleton" style="width:65%;height:0.875rem;border-radius:0.375rem;margin-bottom:0.5rem"></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem">
+              <div class="skeleton" style="width:4rem;height:0.75rem;border-radius:0.375rem"></div>
+              <div class="skeleton" style="width:3.5rem;height:0.75rem;border-radius:0.375rem"></div>
+            </div>
+            <div class="skeleton" style="width:100%;height:0.25rem;border-radius:999px"></div>
+          </div>
+        </div>
+      </section>
+    </template>
+
     <!-- Income Categories -->
+    <template v-if="!loading">
     <section>
       <div class="section-heading section-heading--income">
         <span class="section-dot section-dot--income"></span>
@@ -50,7 +104,7 @@
           <div class="cat-bar mt-2" :style="{ backgroundColor: cat.color }"></div>
         </div>
         
-        <div v-if="!income.length" class="empty-state">
+        <div v-if="!loading && !income.length" class="empty-state">
           <FolderOpenIcon class="w-10 h-10 text-muted mb-2" />
           <p>No income categories yet</p>
           <button @click="openModal(null, 'income')" class="btn-ghost btn-sm mt-3">
@@ -98,7 +152,7 @@
           <div class="cat-bar mt-2" :style="{ backgroundColor: cat.color }"></div>
         </div>
 
-        <div v-if="!expense.length" class="empty-state">
+        <div v-if="!loading && !expense.length" class="empty-state">
           <FolderOpenIcon class="w-10 h-10 text-muted mb-2" />
           <p>No expense categories yet</p>
           <button @click="openModal(null, 'expense')" class="btn-ghost btn-sm mt-3">
@@ -107,6 +161,7 @@
         </div>
       </div>
     </section>
+    </template> <!-- end v-if="!loading" -->
 
     <!-- Add/Edit Modal -->
     <div v-if="showModal" class="modal-overlay">
@@ -192,6 +247,7 @@ import { CATEGORY_COLORS } from '../utils/constants'
 
 const toast      = inject('toast')
 const categories = ref([])
+const loading    = ref(true)
 const showModal  = ref(false)
 const editingCat = ref(null)
 const categoryToDelete = ref(null)
@@ -222,8 +278,13 @@ function getCategoryIcon(name = '') {
 }
 
 async function fetchCategories() {
-  const { data } = await axios.get('/api/categories')
-  categories.value = data
+  loading.value = true
+  try {
+    const { data } = await axios.get('/api/categories')
+    categories.value = data
+  } finally {
+    loading.value = false
+  }
 }
 
 function openModal(cat = null, defaultType = 'expense') {

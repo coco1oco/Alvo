@@ -389,4 +389,22 @@ provide('isDark', isDark)
 .logout-btn:hover { background-color: var(--danger-light); color: var(--danger); }
 .app-main { background-color: var(--bg-base); }
 .toast-item { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+/* ── Skeleton loading ─────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-2) 25%,
+    color-mix(in srgb, var(--bg-surface-2) 55%, var(--bg-surface)) 50%,
+    var(--bg-surface-2) 75%
+  );
+  background-size: 1200px 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
 </style>

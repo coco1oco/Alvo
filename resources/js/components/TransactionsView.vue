@@ -76,9 +76,31 @@
 
     <!-- Table -->
     <div class="table-card">
-      <div v-if="loading" class="table-loading">
-        <div class="spinner"></div>
-      </div>
+      <!-- Skeleton rows — real thead stays, tbody becomes skeletons -->
+      <table v-if="loading" class="txn-table">
+        <thead>
+          <tr class="table-head-row">
+            <th class="th">Date</th>
+            <th class="th">Type</th>
+            <th class="th">Account</th>
+            <th class="th">Category</th>
+            <th class="th">Description</th>
+            <th class="th th--right">Amount</th>
+            <th class="th"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="i in 8" :key="i" class="table-row" style="pointer-events:none">
+            <td class="td"><div class="skeleton" style="width:5rem;height:0.75rem;border-radius:0.375rem"></div></td>
+            <td class="td"><div class="skeleton" style="width:4.5rem;height:1.375rem;border-radius:999px"></div></td>
+            <td class="td"><div class="skeleton" style="width:6rem;height:0.75rem;border-radius:0.375rem"></div></td>
+            <td class="td"><div class="skeleton" style="width:5rem;height:0.75rem;border-radius:0.375rem"></div></td>
+            <td class="td"><div class="skeleton" style="width:8rem;height:0.75rem;border-radius:0.375rem"></div></td>
+            <td class="td" style="text-align:right"><div class="skeleton" style="width:4.5rem;height:0.875rem;border-radius:0.375rem;margin-left:auto"></div></td>
+            <td class="td"></td>
+          </tr>
+        </tbody>
+      </table>
 
       <table v-else class="txn-table">
         <thead>
