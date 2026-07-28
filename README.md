@@ -19,7 +19,7 @@ Alvo is a modern, lightweight, and professional personal finance manager designe
 - **Frontend:** [Vue 3](https://vuejs.org/) (Composition API) + [Vite](https://vitejs.dev/)
 - **Styling:** CSS Custom Properties + Tailwind CSS v4 Engine
 - **Auth:** Clerk + Custom JWT Verification Middleware
-- **Database:** SQLite (local development)
+- **Database:** MariaDB
 
 ## Local Development Setup
 
