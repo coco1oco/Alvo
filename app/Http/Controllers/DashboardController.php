@@ -11,23 +11,21 @@ class DashboardController extends AbstractController
     /**
      * Return aggregated dashboard statistics for the authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function index(Request $request): JsonResponse
     {
-        $user     = $request->user();
-        $month    = now()->format('Y-m');
-        $year     = now()->year;
+        $user = $request->user();
+        $month = now()->format('Y-m');
+        $year = now()->year;
         $monthNum = now()->month;
 
         // Net Worth = total non-CC balances (assets) minus total CC outstanding balances (liabilities).
         // CC balances are stored as positive outstanding debt, so they are subtracted.
-        $totalAssets      = (float) $user->accounts()->whereNotIn('type', ['credit_card'])->sum('balance');
+        $totalAssets = (float) $user->accounts()->whereNotIn('type', ['credit_card'])->sum('balance');
         $totalLiabilities = (float) $user->accounts()->where('type', 'credit_card')->sum('balance');
-        $totalBalance     = $totalAssets - $totalLiabilities;
-        $accounts         = $user->accounts()->orderBy('name')->get();
-
+        $totalBalance = $totalAssets - $totalLiabilities;
+        $accounts = $user->accounts()->orderBy('name')->get();
 
         // This month income & expense
         $monthlyIncome = $user->transactions()
@@ -45,12 +43,12 @@ class DashboardController extends AbstractController
         // Monthly cashflow - last 6 months grouped by month
         $cashflow = [];
         for ($i = 5; $i >= 0; $i--) {
-            $date    = now()->subMonths($i);
-            $y       = $date->year;
-            $m       = $date->month;
-            $label   = $date->format('M Y');
+            $date = now()->subMonths($i);
+            $y = $date->year;
+            $m = $date->month;
+            $label = $date->format('M Y');
 
-            $income  = $user->transactions()
+            $income = $user->transactions()
                 ->where('type', 'income')
                 ->whereYear('date', $y)
                 ->whereMonth('date', $m)
@@ -63,8 +61,8 @@ class DashboardController extends AbstractController
                 ->sum('amount');
 
             $cashflow[] = [
-                'label'   => $label,
-                'income'  => (float) $income,
+                'label' => $label,
+                'income' => (float) $income,
                 'expense' => (float) $expense,
             ];
         }
@@ -78,10 +76,10 @@ class DashboardController extends AbstractController
             ->select('category_id', DB::raw('SUM(amount) as total'))
             ->groupBy('category_id')
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'category' => $row->category?->name ?? 'Uncategorized',
-                'color'    => $row->category?->color ?? '#64748b',
-                'total'    => (float) $row->total,
+                'color' => $row->category?->color ?? '#64748b',
+                'total' => (float) $row->total,
             ]);
 
         // Budget status this month
@@ -98,11 +96,11 @@ class DashboardController extends AbstractController
                     ->sum('amount');
 
                 return [
-                    'id'         => $budget->id,
-                    'category'   => $budget->category?->name,
-                    'color'      => $budget->category?->color ?? '#6366f1',
-                    'budget'     => (float) $budget->amount,
-                    'spent'      => (float) $spent,
+                    'id' => $budget->id,
+                    'category' => $budget->category?->name,
+                    'color' => $budget->category?->color ?? '#6366f1',
+                    'budget' => (float) $budget->amount,
+                    'spent' => (float) $spent,
                     'percentage' => $budget->amount > 0
                         ? round(((float) $spent / (float) $budget->amount) * 100, 1)
                         : 0,
@@ -142,18 +140,18 @@ class DashboardController extends AbstractController
             ->get();
 
         return response()->json([
-            'total_balance'       => (float) $totalBalance,
-            'monthly_income'      => (float) $monthlyIncome,
-            'monthly_expense'     => (float) $monthlyExpense,
-            'net'                 => (float) $monthlyIncome - (float) $monthlyExpense,
-            'accounts'            => $accounts,
-            'cashflow'            => $cashflow,
+            'total_balance' => (float) $totalBalance,
+            'monthly_income' => (float) $monthlyIncome,
+            'monthly_expense' => (float) $monthlyExpense,
+            'net' => (float) $monthlyIncome - (float) $monthlyExpense,
+            'accounts' => $accounts,
+            'cashflow' => $cashflow,
             'expense_by_category' => $expenseByCategory,
-            'budgets'             => $budgets,
+            'budgets' => $budgets,
             'recent_transactions' => $recentTransactions,
-            'upcoming_bills'      => $upcomingBills,
-            'goals'               => $goals,
-            'subscriptions'       => $subscriptions,
+            'upcoming_bills' => $upcomingBills,
+            'goals' => $goals,
+            'subscriptions' => $subscriptions,
         ]);
     }
 }

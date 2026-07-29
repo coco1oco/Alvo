@@ -16,16 +16,14 @@ class UpdateCategoryRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
-            'name'  => 'sometimes|required|string|max:100',
-            'type'  => 'sometimes|required|in:income,expense',
+            'name' => 'sometimes|required|string|max:100',
+            'type' => 'sometimes|required|in:income,expense',
             'color' => 'sometimes|nullable|string|max:7',
-            'icon'  => 'sometimes|nullable|string|max:50',
+            'icon' => 'sometimes|nullable|string|max:50',
         ];
     }
 }

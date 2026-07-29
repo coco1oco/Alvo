@@ -22,9 +22,9 @@ class Goal extends Model
     ];
 
     protected $casts = [
-        'target_amount'  => 'decimal:2',
+        'target_amount' => 'decimal:2',
         'current_amount' => 'decimal:2',
-        'deadline'       => 'date',
+        'deadline' => 'date',
     ];
 
     protected $appends = [
@@ -61,9 +61,12 @@ class Goal extends Model
     public function getProgressPercentageAttribute(): float
     {
         $target = (float) $this->target_amount;
-        if ($target <= 0) return 0;
+        if ($target <= 0) {
+            return 0;
+        }
 
         $current = $this->effective_current_amount;
+
         return round(min(($current / $target) * 100, 100), 1);
     }
 }

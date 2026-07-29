@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\VerifyClerkToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'clerk' => \App\Http\Middleware\VerifyClerkToken::class,
+            'clerk' => VerifyClerkToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

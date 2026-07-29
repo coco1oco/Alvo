@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,9 +9,6 @@ class NetWorthController extends AbstractController
 {
     /**
      * Get Balance Sheet and Net Worth Statement data.
-     *
-     * @param  Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -27,11 +22,11 @@ class NetWorthController extends AbstractController
             ->values()
             ->map(function ($a) {
                 return [
-                    'id'      => $a->id,
-                    'name'    => $a->name,
-                    'type'    => $a->type,
-                    'color'   => $a->color ?? '#6366f1',
-                    'icon'    => $a->icon,
+                    'id' => $a->id,
+                    'name' => $a->name,
+                    'type' => $a->type,
+                    'color' => $a->color ?? '#6366f1',
+                    'icon' => $a->icon,
                     'balance' => (float) $a->balance,
                 ];
             });
@@ -43,15 +38,16 @@ class NetWorthController extends AbstractController
             ->values()
             ->map(function ($a) {
                 $owed = Math_max((float) $a->balance, 0);
+
                 return [
-                    'id'           => $a->id,
-                    'name'         => $a->name,
-                    'type'         => $a->type,
-                    'color'        => $a->color ?? '#ef4444',
-                    'icon'         => $a->icon,
-                    'owed'         => $owed,
+                    'id' => $a->id,
+                    'name' => $a->name,
+                    'type' => $a->type,
+                    'color' => $a->color ?? '#ef4444',
+                    'icon' => $a->icon,
+                    'owed' => $owed,
                     'credit_limit' => (float) $a->credit_limit,
-                    'utilization'  => $a->credit_limit > 0 ? round(($owed / (float) $a->credit_limit) * 100, 1) : 0,
+                    'utilization' => $a->credit_limit > 0 ? round(($owed / (float) $a->credit_limit) * 100, 1) : 0,
                 ];
             });
 
@@ -81,23 +77,24 @@ class NetWorthController extends AbstractController
             $historicalNetWorth = $netWorth - $futureIncome + $futureExpense;
 
             $trend[] = [
-                'month'     => $monthDate->format('M Y'),
+                'month' => $monthDate->format('M Y'),
                 'net_worth' => round($historicalNetWorth, 2),
             ];
         }
 
         return response()->json([
-            'net_worth'         => round($netWorth, 2),
-            'total_assets'      => round($totalAssets, 2),
+            'net_worth' => round($netWorth, 2),
+            'total_assets' => round($totalAssets, 2),
             'total_liabilities' => round($totalLiabilities, 2),
-            'solvency_ratio'    => $solvencyRatio,
-            'assets'            => $assetAccounts,
-            'liabilities'       => $liabilityAccounts,
-            'historical_trend'  => $trend,
+            'solvency_ratio' => $solvencyRatio,
+            'assets' => $assetAccounts,
+            'liabilities' => $liabilityAccounts,
+            'historical_trend' => $trend,
         ]);
     }
 }
 
-function Math_max($a, $b) {
+function Math_max($a, $b)
+{
     return $a > $b ? $a : $b;
 }

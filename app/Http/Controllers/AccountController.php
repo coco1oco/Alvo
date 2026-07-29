@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
+use App\Models\Account;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,8 +13,7 @@ class AccountController extends AbstractController
     /**
      * List all accounts belonging to the authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function index(Request $request): JsonResponse
     {
@@ -29,22 +28,21 @@ class AccountController extends AbstractController
     /**
      * Create a new account for the authenticated user.
      *
-     * @param  StoreAccountRequest $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  StoreAccountRequest  $request  the incoming HTTP request
      */
     public function store(StoreAccountRequest $request): JsonResponse
     {
         $data = $request->validated();
 
         $account = $request->user()->accounts()->create([
-            'name'              => $data['name'],
-            'type'              => $data['type'],
-            'balance'           => $data['balance'] ?? 0,
-            'credit_limit'      => $data['credit_limit'] ?? null,
+            'name' => $data['name'],
+            'type' => $data['type'],
+            'balance' => $data['balance'] ?? 0,
+            'credit_limit' => $data['credit_limit'] ?? null,
             'billing_cycle_day' => $data['billing_cycle_day'] ?? null,
-            'due_date_day'      => $data['due_date_day'] ?? null,
-            'color'             => $data['color'] ?? '#6366f1',
-            'icon'              => $data['icon'] ?? 'wallet',
+            'due_date_day' => $data['due_date_day'] ?? null,
+            'color' => $data['color'] ?? '#6366f1',
+            'icon' => $data['icon'] ?? 'wallet',
         ]);
 
         return response()->json($account, 201);
@@ -53,9 +51,8 @@ class AccountController extends AbstractController
     /**
      * Update an existing account.
      *
-     * @param  UpdateAccountRequest $request the incoming HTTP request
-     * @param  Account              $account the account to update
-     * @return JsonResponse
+     * @param  UpdateAccountRequest  $request  the incoming HTTP request
+     * @param  Account  $account  the account to update
      */
     public function update(UpdateAccountRequest $request, Account $account): JsonResponse
     {
@@ -71,9 +68,8 @@ class AccountController extends AbstractController
     /**
      * Delete an account.
      *
-     * @param  Request $request the incoming HTTP request
-     * @param  Account $account the account to delete
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
+     * @param  Account  $account  the account to delete
      */
     public function destroy(Request $request, Account $account): JsonResponse
     {
@@ -87,9 +83,8 @@ class AccountController extends AbstractController
     /**
      * Abort with 403 if the account does not belong to the authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
-     * @param  Account $account the account to authorize against
-     * @return void
+     * @param  Request  $request  the incoming HTTP request
+     * @param  Account  $account  the account to authorize against
      */
     private function authorizeAccount(Request $request, Account $account): void
     {

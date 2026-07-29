@@ -12,9 +12,6 @@ class SubscriptionController extends AbstractController
 {
     /**
      * List all subscriptions for the authenticated user.
-     *
-     * @param  Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -29,9 +26,6 @@ class SubscriptionController extends AbstractController
 
     /**
      * Create a new subscription record.
-     *
-     * @param  StoreSubscriptionRequest $request
-     * @return JsonResponse
      */
     public function store(StoreSubscriptionRequest $request): JsonResponse
     {
@@ -43,10 +37,6 @@ class SubscriptionController extends AbstractController
 
     /**
      * Update an existing subscription.
-     *
-     * @param  UpdateSubscriptionRequest $request
-     * @param  Subscription              $subscription
-     * @return JsonResponse
      */
     public function update(UpdateSubscriptionRequest $request, Subscription $subscription): JsonResponse
     {
@@ -60,10 +50,6 @@ class SubscriptionController extends AbstractController
 
     /**
      * Delete a subscription.
-     *
-     * @param  Request      $request
-     * @param  Subscription $subscription
-     * @return JsonResponse
      */
     public function destroy(Request $request, Subscription $subscription): JsonResponse
     {

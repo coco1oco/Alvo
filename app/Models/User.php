@@ -37,61 +37,40 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
-    /**
-     * @return HasMany
-     */
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function categories(): HasMany
     {
         return $this->hasMany(Category::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function budgets(): HasMany
     {
         return $this->hasMany(Budget::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function recurringTransactions(): HasMany
     {
         return $this->hasMany(RecurringTransaction::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function goals(): HasMany
     {
         return $this->hasMany(Goal::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);

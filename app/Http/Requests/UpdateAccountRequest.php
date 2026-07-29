@@ -17,29 +17,28 @@ class UpdateAccountRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         $account = $this->route('account');
+
         return [
-            'name'  => [
+            'name' => [
                 'sometimes',
                 'required',
                 'string',
                 'max:100',
                 Rule::unique('accounts')->where(function ($query) {
                     return $query->where('user_id', $this->user()->id);
-                })->ignore($account->id)
+                })->ignore($account->id),
             ],
-            'type'              => 'sometimes|required|in:cash,bank,credit_card,savings,other',
-            'credit_limit'      => 'sometimes|nullable|numeric|min:1',
+            'type' => 'sometimes|required|in:cash,bank,credit_card,savings,other',
+            'credit_limit' => 'sometimes|nullable|numeric|min:1',
             'billing_cycle_day' => 'sometimes|nullable|integer|min:1|max:28',
-            'due_date_day'      => 'sometimes|nullable|integer|min:1|max:28',
-            'color'             => 'sometimes|nullable|string|max:7',
-            'icon'              => 'sometimes|nullable|string|max:50',
-            'is_archived'       => 'sometimes|boolean',
+            'due_date_day' => 'sometimes|nullable|integer|min:1|max:28',
+            'color' => 'sometimes|nullable|string|max:7',
+            'icon' => 'sometimes|nullable|string|max:50',
+            'is_archived' => 'sometimes|boolean',
         ];
     }
 }

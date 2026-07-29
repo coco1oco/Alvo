@@ -24,9 +24,9 @@ class Subscription extends Model
     ];
 
     protected $casts = [
-        'amount'            => 'decimal:2',
+        'amount' => 'decimal:2',
         'next_renewal_date' => 'date',
-        'is_active'         => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     protected $appends = [
@@ -54,10 +54,11 @@ class Subscription extends Model
     public function getMonthlyAmountAttribute(): float
     {
         $amount = (float) $this->amount;
+
         return match ($this->billing_cycle) {
             'weekly' => round($amount * 4.33, 2),
             'yearly' => round($amount / 12, 2),
-            default  => $amount,
+            default => $amount,
         };
     }
 }

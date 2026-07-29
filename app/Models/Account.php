@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Account extends Model
 {
@@ -26,45 +26,39 @@ class Account extends Model
 
     /** @var array<string, string> */
     protected $casts = [
-        'balance'           => 'decimal:2',
-        'credit_limit'      => 'decimal:2',
+        'balance' => 'decimal:2',
+        'credit_limit' => 'decimal:2',
         'billing_cycle_day' => 'integer',
-        'due_date_day'      => 'integer',
-        'is_archived'       => 'boolean',
+        'due_date_day' => 'integer',
+        'is_archived' => 'boolean',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function incomingTransfers(): HasMany
     {
         return $this->hasMany(Transaction::class, 'to_account_id');
     }
 
     /**
-     * Adjust balance by a signed amount (positive = credit, negative = debit).
+     * Adjust balance by a signed amount (positive = credit, negative = debit) using BCMath precision.
      *
-     * @param  float $amount the signed amount to adjust by
-     * @return void
+     * @param  string|float|int  $amount  the signed amount to adjust by
      */
-    public function adjustBalance(float $amount): void
+    public function adjustBalance(string|float|int $amount): void
     {
-        $this->increment('balance', $amount);
+        $current = number_format((float) ($this->balance ?? 0), 2, '.', '');
+        $delta = number_format((float) $amount, 2, '.', '');
+        $newBalance = bcadd($current, $delta, 2);
+
+        $this->update(['balance' => $newBalance]);
     }
 }

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Account;
 use App\Models\User;
 use App\Services\TransactionService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -18,7 +19,7 @@ class TransactionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new TransactionService();
+        $this->service = new TransactionService;
     }
 
     public function test_expense_decreases_checking_account_balance(): void
@@ -28,9 +29,9 @@ class TransactionServiceTest extends TestCase
 
         $this->service->createTransaction($user, [
             'account_id' => $account->id,
-            'type'       => 'expense',
-            'amount'     => 40,
-            'date'       => now()->toDateString(),
+            'type' => 'expense',
+            'amount' => 40,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(60, $account->fresh()->balance);
@@ -43,9 +44,9 @@ class TransactionServiceTest extends TestCase
 
         $this->service->createTransaction($user, [
             'account_id' => $account->id,
-            'type'       => 'income',
-            'amount'     => 25,
-            'date'       => now()->toDateString(),
+            'type' => 'income',
+            'amount' => 25,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(125, $account->fresh()->balance);
@@ -58,9 +59,9 @@ class TransactionServiceTest extends TestCase
 
         $this->service->createTransaction($user, [
             'account_id' => $card->id,
-            'type'       => 'expense',
-            'amount'     => 50,
-            'date'       => now()->toDateString(),
+            'type' => 'expense',
+            'amount' => 50,
+            'date' => now()->toDateString(),
         ]);
 
         // Expense on a credit card raises outstanding debt, not lowers it.
@@ -74,9 +75,9 @@ class TransactionServiceTest extends TestCase
 
         $this->service->createTransaction($user, [
             'account_id' => $card->id,
-            'type'       => 'income',
-            'amount'     => 30,
-            'date'       => now()->toDateString(),
+            'type' => 'income',
+            'amount' => 30,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(70, $card->fresh()->balance);
@@ -89,11 +90,11 @@ class TransactionServiceTest extends TestCase
         $to = Account::factory()->for($user)->create(['balance' => 50]);
 
         $this->service->createTransaction($user, [
-            'account_id'    => $from->id,
+            'account_id' => $from->id,
             'to_account_id' => $to->id,
-            'type'          => 'transfer',
-            'amount'        => 75,
-            'date'          => now()->toDateString(),
+            'type' => 'transfer',
+            'amount' => 75,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(125, $from->fresh()->balance);
@@ -107,11 +108,11 @@ class TransactionServiceTest extends TestCase
         $card = Account::factory()->for($user)->creditCard()->create(['balance' => 100]);
 
         $this->service->createTransaction($user, [
-            'account_id'    => $checking->id,
+            'account_id' => $checking->id,
             'to_account_id' => $card->id,
-            'type'          => 'transfer',
-            'amount'        => 60,
-            'date'          => now()->toDateString(),
+            'type' => 'transfer',
+            'amount' => 60,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(240, $checking->fresh()->balance);
@@ -127,11 +128,11 @@ class TransactionServiceTest extends TestCase
         $this->expectException(HttpException::class);
 
         $this->service->createTransaction($user, [
-            'account_id'    => $card->id,
+            'account_id' => $card->id,
             'to_account_id' => $checking->id,
-            'type'          => 'transfer',
-            'amount'        => 20,
-            'date'          => now()->toDateString(),
+            'type' => 'transfer',
+            'amount' => 20,
+            'date' => now()->toDateString(),
         ]);
     }
 
@@ -142,9 +143,9 @@ class TransactionServiceTest extends TestCase
 
         $transaction = $this->service->createTransaction($user, [
             'account_id' => $account->id,
-            'type'       => 'expense',
-            'amount'     => 40,
-            'date'       => now()->toDateString(),
+            'type' => 'expense',
+            'amount' => 40,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(60, $account->fresh()->balance);
@@ -161,18 +162,18 @@ class TransactionServiceTest extends TestCase
 
         $transaction = $this->service->createTransaction($user, [
             'account_id' => $account->id,
-            'type'       => 'expense',
-            'amount'     => 40,
-            'date'       => now()->toDateString(),
+            'type' => 'expense',
+            'amount' => 40,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(60, $account->fresh()->balance);
 
         $this->service->updateTransaction($user, $transaction, [
             'account_id' => $account->id,
-            'type'       => 'expense',
-            'amount'     => 70,
-            'date'       => now()->toDateString(),
+            'type' => 'expense',
+            'amount' => 70,
+            'date' => now()->toDateString(),
         ]);
 
         $this->assertEquals(30, $account->fresh()->balance);
@@ -184,13 +185,13 @@ class TransactionServiceTest extends TestCase
         $attacker = User::factory()->create();
         $victimAccount = Account::factory()->for($owner)->create(['balance' => 500]);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         $this->service->createTransaction($attacker, [
             'account_id' => $victimAccount->id,
-            'type'       => 'expense',
-            'amount'     => 500,
-            'date'       => now()->toDateString(),
+            'type' => 'expense',
+            'amount' => 500,
+            'date' => now()->toDateString(),
         ]);
     }
 }

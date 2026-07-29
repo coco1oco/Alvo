@@ -26,11 +26,11 @@ class RecurringTransaction extends Model
     ];
 
     protected $casts = [
-        'amount'        => 'decimal:2',
-        'start_date'    => 'date',
+        'amount' => 'decimal:2',
+        'start_date' => 'date',
         'next_due_date' => 'date',
-        'is_active'     => 'boolean',
-        'auto_process'  => 'boolean',
+        'is_active' => 'boolean',
+        'auto_process' => 'boolean',
     ];
 
     public function user(): BelongsTo

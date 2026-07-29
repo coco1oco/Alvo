@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,8 +13,7 @@ class CategoryController extends AbstractController
     /**
      * List all categories for the authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function index(Request $request): JsonResponse
     {
@@ -23,7 +22,7 @@ class CategoryController extends AbstractController
             ->withCount('transactions')
             ->withSum(['transactions as monthly_spend' => function ($query) {
                 $query->whereMonth('date', now()->month)
-                      ->whereYear('date', now()->year);
+                    ->whereYear('date', now()->year);
             }], 'amount')
             ->orderBy('type')
             ->orderBy('name')
@@ -35,18 +34,17 @@ class CategoryController extends AbstractController
     /**
      * Create a new category for the authenticated user.
      *
-     * @param  StoreCategoryRequest $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  StoreCategoryRequest  $request  the incoming HTTP request
      */
     public function store(StoreCategoryRequest $request): JsonResponse
     {
         $data = $request->validated();
 
         $category = $request->user()->categories()->create([
-            'name'  => $data['name'],
-            'type'  => $data['type'],
+            'name' => $data['name'],
+            'type' => $data['type'],
             'color' => $data['color'] ?? '#6366f1',
-            'icon'  => $data['icon'] ?? 'tag',
+            'icon' => $data['icon'] ?? 'tag',
         ]);
 
         return response()->json($category, 201);
@@ -55,9 +53,8 @@ class CategoryController extends AbstractController
     /**
      * Update an existing category.
      *
-     * @param  UpdateCategoryRequest $request  the incoming HTTP request
-     * @param  Category              $category the category to update
-     * @return JsonResponse
+     * @param  UpdateCategoryRequest  $request  the incoming HTTP request
+     * @param  Category  $category  the category to update
      */
     public function update(UpdateCategoryRequest $request, Category $category): JsonResponse
     {
@@ -74,8 +71,7 @@ class CategoryController extends AbstractController
      * Delete a category.
      *
      * @param  Request  $request  the incoming HTTP request
-     * @param  Category $category the category to delete
-     * @return JsonResponse
+     * @param  Category  $category  the category to delete
      */
     public function destroy(Request $request, Category $category): JsonResponse
     {

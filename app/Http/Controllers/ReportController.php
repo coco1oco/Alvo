@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,9 +11,6 @@ class ReportController extends AbstractController
 {
     /**
      * Get aggregated financial reports and analytics.
-     *
-     * @param  Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -42,7 +38,7 @@ class ReportController extends AbstractController
         $cashflowTrend = [];
         for ($i = $trendMonths - 1; $i >= 0; $i--) {
             $mStart = now()->subMonths($i)->startOfMonth();
-            $mEnd   = now()->subMonths($i)->endOfMonth();
+            $mEnd = now()->subMonths($i)->endOfMonth();
 
             $mIncome = (float) $user->transactions()
                 ->where('type', 'income')
@@ -55,10 +51,10 @@ class ReportController extends AbstractController
                 ->sum('amount');
 
             $cashflowTrend[] = [
-                'month'   => $mStart->format('M Y'),
-                'income'  => $mIncome,
+                'month' => $mStart->format('M Y'),
+                'income' => $mIncome,
                 'expense' => $mExpense,
-                'net'     => $mIncome - $mExpense,
+                'net' => $mIncome - $mExpense,
             ];
         }
 
@@ -82,13 +78,14 @@ class ReportController extends AbstractController
             ->get()
             ->map(function ($cat) use ($totalExpense) {
                 $amt = (float) $cat->total_amount;
+
                 return [
-                    'id'         => $cat->id,
-                    'name'       => $cat->name,
-                    'color'      => $cat->color ?? '#6366f1',
-                    'icon'       => $cat->icon,
-                    'amount'     => $amt,
-                    'count'      => (int) $cat->txn_count,
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'color' => $cat->color ?? '#6366f1',
+                    'icon' => $cat->icon,
+                    'amount' => $amt,
+                    'count' => (int) $cat->txn_count,
                     'percentage' => $totalExpense > 0 ? round(($amt / $totalExpense) * 100, 1) : 0,
                 ];
             });
@@ -105,20 +102,20 @@ class ReportController extends AbstractController
             ->toArray();
 
         return response()->json([
-            'period'          => $period,
-            'from_date'       => $fromDate->toDateString(),
-            'to_date'         => $toDate->toDateString(),
-            'kpis'            => [
-                'total_income'    => $totalIncome,
-                'total_expense'   => $totalExpense,
-                'net_cashflow'    => $netCashflow,
-                'savings_rate'    => $savingsRate,
+            'period' => $period,
+            'from_date' => $fromDate->toDateString(),
+            'to_date' => $toDate->toDateString(),
+            'kpis' => [
+                'total_income' => $totalIncome,
+                'total_expense' => $totalExpense,
+                'net_cashflow' => $netCashflow,
+                'savings_rate' => $savingsRate,
                 'avg_daily_spend' => $avgDailySpend,
-                'days_count'      => $daysInPeriod,
+                'days_count' => $daysInPeriod,
             ],
-            'cashflow_trend'  => $cashflowTrend,
+            'cashflow_trend' => $cashflowTrend,
             'category_report' => $categoryBreakdown,
-            'daily_expenses'  => $dailyExpenses,
+            'daily_expenses' => $dailyExpenses,
         ]);
     }
 
@@ -128,15 +125,15 @@ class ReportController extends AbstractController
     private function resolveDateRange(string $period, ?string $customFrom, ?string $customTo): array
     {
         return match ($period) {
-            'this_month'    => [now()->startOfMonth(), now()->endOfMonth()],
-            'last_month'    => [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()],
+            'this_month' => [now()->startOfMonth(), now()->endOfMonth()],
+            'last_month' => [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()],
             'last_3_months' => [now()->subMonths(2)->startOfMonth(), now()->endOfMonth()],
-            'this_year'     => [now()->startOfYear(), now()->endOfYear()],
-            'custom'        => [
+            'this_year' => [now()->startOfYear(), now()->endOfYear()],
+            'custom' => [
                 $customFrom ? Carbon::parse($customFrom) : now()->startOfMonth(),
                 $customTo ? Carbon::parse($customTo) : now()->endOfMonth(),
             ],
-            default         => [now()->startOfMonth(), now()->endOfMonth()],
+            default => [now()->startOfMonth(), now()->endOfMonth()],
         };
     }
 }

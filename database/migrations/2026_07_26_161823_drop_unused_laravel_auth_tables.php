@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::dropIfExists('password_reset_tokens');
-        
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn(['password', 'email_verified_at']);
         });

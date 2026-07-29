@@ -12,9 +12,8 @@ class TransactionService
     /**
      * Create a new transaction and adjust account balances accordingly.
      *
-     * @param  User  $user the authenticated user
-     * @param  array $data the transaction data
-     * @return Transaction
+     * @param  User  $user  the authenticated user
+     * @param  array  $data  the transaction data
      */
     public function createTransaction(User $user, array $data): Transaction
     {
@@ -29,8 +28,8 @@ class TransactionService
             $transaction = $user->transactions()->create($data);
 
             match ($data['type']) {
-                'income'   => $this->adjustBalance($account, 'income', (float) $data['amount']),
-                'expense'  => $this->adjustBalance($account, 'expense', (float) $data['amount']),
+                'income' => $this->adjustBalance($account, 'income', (float) $data['amount']),
+                'expense' => $this->adjustBalance($account, 'expense', (float) $data['amount']),
                 'transfer' => (function () use ($data, $account, $user) {
                     $toAccount = $user->accounts()->findOrFail($data['to_account_id']);
                     // Deduct from source (always a non-CC account at this point)
@@ -52,10 +51,9 @@ class TransactionService
     /**
      * Update an existing transaction and reapply balance effects.
      *
-     * @param  User        $user        the authenticated user
-     * @param  Transaction $transaction the transaction to update
-     * @param  array       $data        the transaction data to update
-     * @return Transaction
+     * @param  User  $user  the authenticated user
+     * @param  Transaction  $transaction  the transaction to update
+     * @param  array  $data  the transaction data to update
      */
     public function updateTransaction(User $user, Transaction $transaction, array $data): Transaction
     {
@@ -76,9 +74,8 @@ class TransactionService
     /**
      * Delete a transaction and reverse its balance effect.
      *
-     * @param  User        $user        the authenticated user
-     * @param  Transaction $transaction the transaction to delete
-     * @return void
+     * @param  User  $user  the authenticated user
+     * @param  Transaction  $transaction  the transaction to delete
      */
     public function deleteTransaction(User $user, Transaction $transaction): void
     {
@@ -91,9 +88,8 @@ class TransactionService
     /**
      * Restore a soft-deleted transaction and reapply its balance effect.
      *
-     * @param  User        $user        the authenticated user
-     * @param  Transaction $transaction the soft-deleted transaction
-     * @return void
+     * @param  User  $user  the authenticated user
+     * @param  Transaction  $transaction  the soft-deleted transaction
      */
     public function restoreTransaction(User $user, Transaction $transaction): void
     {
@@ -106,18 +102,19 @@ class TransactionService
     /**
      * Reverse the balance effect of a transaction on the relevant accounts.
      *
-     * @param  User        $user        the authenticated user
-     * @param  Transaction $transaction the transaction whose effect should be reversed
-     * @return void
+     * @param  User  $user  the authenticated user
+     * @param  Transaction  $transaction  the transaction whose effect should be reversed
      */
     private function reverseBalanceEffect(User $user, Transaction $transaction): void
     {
         $account = $user->accounts()->find($transaction->account_id);
-        if (!$account) return;
+        if (! $account) {
+            return;
+        }
 
         match ($transaction->type) {
-            'income'   => $this->adjustBalance($account, 'income', -(float) $transaction->amount),
-            'expense'  => $this->adjustBalance($account, 'expense', -(float) $transaction->amount),
+            'income' => $this->adjustBalance($account, 'income', -(float) $transaction->amount),
+            'expense' => $this->adjustBalance($account, 'expense', -(float) $transaction->amount),
             'transfer' => (function () use ($user, $transaction, $account) {
                 // Restore source account
                 $this->adjustBalance($account, 'expense', -(float) $transaction->amount);
@@ -136,18 +133,19 @@ class TransactionService
     /**
      * Apply the balance effect of a transaction on the relevant accounts.
      *
-     * @param  User        $user        the authenticated user
-     * @param  Transaction $transaction the transaction to apply
-     * @return void
+     * @param  User  $user  the authenticated user
+     * @param  Transaction  $transaction  the transaction to apply
      */
     private function applyBalanceEffect(User $user, Transaction $transaction): void
     {
         $account = $user->accounts()->find($transaction->account_id);
-        if (!$account) return;
+        if (! $account) {
+            return;
+        }
 
         match ($transaction->type) {
-            'income'   => $this->adjustBalance($account, 'income', (float) $transaction->amount),
-            'expense'  => $this->adjustBalance($account, 'expense', (float) $transaction->amount),
+            'income' => $this->adjustBalance($account, 'income', (float) $transaction->amount),
+            'expense' => $this->adjustBalance($account, 'expense', (float) $transaction->amount),
             'transfer' => (function () use ($user, $transaction, $account) {
                 $this->adjustBalance($account, 'expense', (float) $transaction->amount);
                 $toAccount = $user->accounts()->find($transaction->to_account_id);
@@ -175,20 +173,21 @@ class TransactionService
      *
      * Pass a negative $amount to reverse/undo an effect.
      *
-     * @param  Account $account the account to adjust
-     * @param  string  $type    'income' or 'expense'
-     * @param  float   $amount  the raw amount (positive = apply, negative = reverse)
-     * @return void
+     * @param  Account  $account  the account to adjust
+     * @param  string  $type  'income' or 'expense'
+     * @param  float  $amount  the raw amount (positive = apply, negative = reverse)
      */
-    private function adjustBalance(Account $account, string $type, float $amount): void
+    private function adjustBalance(Account $account, string $type, string|float|int $amount): void
     {
+        $amountStr = number_format((float) $amount, 2, '.', '');
+
         if ($account->type === 'credit_card') {
             // For credit cards the sign is inverted relative to normal accounts.
             // expense → debt goes UP (+amount), income → debt goes DOWN (-amount)
-            $delta = ($type === 'expense') ? $amount : -$amount;
+            $delta = ($type === 'expense') ? $amountStr : bcmul($amountStr, '-1', 2);
         } else {
             // For regular accounts: income → balance UP, expense → balance DOWN
-            $delta = ($type === 'income') ? $amount : -$amount;
+            $delta = ($type === 'income') ? $amountStr : bcmul($amountStr, '-1', 2);
         }
 
         $account->adjustBalance($delta);

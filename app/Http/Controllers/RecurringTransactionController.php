@@ -14,9 +14,6 @@ class RecurringTransactionController extends AbstractController
 {
     /**
      * List all recurring transactions for the authenticated user.
-     *
-     * @param  Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -31,9 +28,6 @@ class RecurringTransactionController extends AbstractController
 
     /**
      * Store a new recurring transaction schedule.
-     *
-     * @param  StoreRecurringTransactionRequest $request
-     * @return JsonResponse
      */
     public function store(StoreRecurringTransactionRequest $request): JsonResponse
     {
@@ -53,10 +47,6 @@ class RecurringTransactionController extends AbstractController
 
     /**
      * Update an existing recurring transaction schedule.
-     *
-     * @param  UpdateRecurringTransactionRequest $request
-     * @param  RecurringTransaction             $recurringTransaction
-     * @return JsonResponse
      */
     public function update(UpdateRecurringTransactionRequest $request, RecurringTransaction $recurringTransaction): JsonResponse
     {
@@ -70,10 +60,6 @@ class RecurringTransactionController extends AbstractController
 
     /**
      * Delete a recurring transaction schedule.
-     *
-     * @param  Request              $request
-     * @param  RecurringTransaction $recurringTransaction
-     * @return JsonResponse
      */
     public function destroy(Request $request, RecurringTransaction $recurringTransaction): JsonResponse
     {
@@ -86,11 +72,6 @@ class RecurringTransactionController extends AbstractController
 
     /**
      * Process/log a recurring transaction now (creates a real transaction record and advances next_due_date).
-     *
-     * @param  Request              $request
-     * @param  RecurringTransaction $recurringTransaction
-     * @param  TransactionService   $service
-     * @return JsonResponse
      */
     public function process(Request $request, RecurringTransaction $recurringTransaction, TransactionService $service): JsonResponse
     {
@@ -98,13 +79,13 @@ class RecurringTransactionController extends AbstractController
 
         // Create actual transaction
         $txnData = [
-            'account_id'    => $recurringTransaction->account_id,
+            'account_id' => $recurringTransaction->account_id,
             'to_account_id' => $recurringTransaction->to_account_id,
-            'category_id'   => $recurringTransaction->category_id,
-            'type'          => $recurringTransaction->type,
-            'amount'        => $recurringTransaction->amount,
-            'description'   => $recurringTransaction->description ? $recurringTransaction->description . ' (Recurring)' : 'Recurring Transaction',
-            'date'          => now()->toDateString(),
+            'category_id' => $recurringTransaction->category_id,
+            'type' => $recurringTransaction->type,
+            'amount' => $recurringTransaction->amount,
+            'description' => $recurringTransaction->description ? $recurringTransaction->description.' (Recurring)' : 'Recurring Transaction',
+            'date' => now()->toDateString(),
         ];
 
         $transaction = $service->createTransaction($request->user(), $txnData);
@@ -124,33 +105,31 @@ class RecurringTransactionController extends AbstractController
     /**
      * Calculate the next due date given a base date and frequency string.
      *
-     * @param  Carbon $date
-     * @param  string $frequency
      * @return string (Y-m-d)
      */
     private function calculateNextDueDate(Carbon $date, string $frequency): string
     {
         $next = $date->copy();
         match ($frequency) {
-            'daily'     => $next->addDay(),
-            'weekly'    => $next->addWeek(),
+            'daily' => $next->addDay(),
+            'weekly' => $next->addWeek(),
             'bi-weekly' => $next->addWeeks(2),
-            'monthly'   => $next->addMonth(),
+            'monthly' => $next->addMonth(),
             'quarterly' => $next->addMonths(3),
-            'yearly'    => $next->addYear(),
-            default     => $next->addMonth(),
+            'yearly' => $next->addYear(),
+            default => $next->addMonth(),
         };
 
         // If calculated date is still in the past, keep advancing until future
-        while ($next->isPast() && !$next->isToday()) {
+        while ($next->isPast() && ! $next->isToday()) {
             match ($frequency) {
-                'daily'     => $next->addDay(),
-                'weekly'    => $next->addWeek(),
+                'daily' => $next->addDay(),
+                'weekly' => $next->addWeek(),
                 'bi-weekly' => $next->addWeeks(2),
-                'monthly'   => $next->addMonth(),
+                'monthly' => $next->addMonth(),
                 'quarterly' => $next->addMonths(3),
-                'yearly'    => $next->addYear(),
-                default     => $next->addMonth(),
+                'yearly' => $next->addYear(),
+                default => $next->addMonth(),
             };
         }
 

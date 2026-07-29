@@ -20,6 +20,8 @@
         "@heroicons/vue": "^2.2.0",
         "@vitejs/plugin-vue": "^6.0.7",
         "chart.js": "^4.5.1",
-        "vue": "^3.5.39"
+        "pinia": "^4.0.2",
+        "vue": "^3.5.39",
+        "vue-router": "^5.2.0"
     }
 }

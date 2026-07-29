@@ -12,9 +12,6 @@ class GoalController extends AbstractController
 {
     /**
      * List all savings goals for the authenticated user.
-     *
-     * @param  Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -29,9 +26,6 @@ class GoalController extends AbstractController
 
     /**
      * Create a new savings goal.
-     *
-     * @param  StoreGoalRequest $request
-     * @return JsonResponse
      */
     public function store(StoreGoalRequest $request): JsonResponse
     {
@@ -43,10 +37,6 @@ class GoalController extends AbstractController
 
     /**
      * Update an existing savings goal.
-     *
-     * @param  UpdateGoalRequest $request
-     * @param  Goal              $goal
-     * @return JsonResponse
      */
     public function update(UpdateGoalRequest $request, Goal $goal): JsonResponse
     {
@@ -60,10 +50,6 @@ class GoalController extends AbstractController
 
     /**
      * Delete a savings goal.
-     *
-     * @param  Request $request
-     * @param  Goal    $goal
-     * @return JsonResponse
      */
     public function destroy(Request $request, Goal $goal): JsonResponse
     {
@@ -76,10 +62,6 @@ class GoalController extends AbstractController
 
     /**
      * Deposit/add funds directly to a goal's current saved amount.
-     *
-     * @param  Request $request
-     * @param  Goal    $goal
-     * @return JsonResponse
      */
     public function deposit(Request $request, Goal $goal): JsonResponse
     {
@@ -93,7 +75,7 @@ class GoalController extends AbstractController
 
         return response()->json([
             'message' => 'Deposit added to goal',
-            'goal'    => $goal->fresh('linkedAccount'),
+            'goal' => $goal->fresh('linkedAccount'),
         ]);
     }
 }

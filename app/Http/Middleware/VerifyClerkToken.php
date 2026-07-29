@@ -2,16 +2,16 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-use Illuminate\Support\Facades\Cache;
-use GuzzleHttp\Client;
 use App\Models\User;
+use Closure;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class VerifyClerkToken
 {
@@ -19,42 +19,47 @@ class VerifyClerkToken
     {
         $token = $request->bearerToken();
 
-        if (!$token) {
+        if (! $token) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
         try {
-            // Retrieve JWKS from Clerk
-            // Clerk provides a JWKS endpoint: https://api.clerk.com/v1/jwks
-            $jwksUrl = 'https://api.clerk.com/v1/jwks';
-            
-            $keys = Cache::remember('clerk_jwks', 86400, function () use ($jwksUrl) {
-                $client = new Client();
-                $response = $client->get($jwksUrl, [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . env('CLERK_SECRET_KEY')
-                    ]
-                ]);
-                return json_decode($response->getBody()->getContents(), true);
+            $jwksUrl = config('services.clerk.jwks_url', 'https://api.clerk.com/v1/jwks');
+            $secretKey = config('services.clerk.secret_key');
+
+            $keys = Cache::remember('clerk_jwks', 86400, function () use ($jwksUrl, $secretKey) {
+                $response = Http::withToken($secretKey)
+                    ->timeout(10)
+                    ->get($jwksUrl);
+
+                if (! $response->successful()) {
+                    throw new \RuntimeException('Failed to fetch JWKS from Clerk API.');
+                }
+
+                return $response->json();
             });
 
-            // Parse keys
-            $jwks = \Firebase\JWT\JWK::parseKeySet($keys);
-            
-            // Decode and verify token
+            // Parse keys & decode token
+            $jwks = JWK::parseKeySet($keys);
             $decoded = JWT::decode($token, $jwks);
-            
+
             // Sync user to database
             $clerkId = $decoded->sub;
-            
+            $email = $decoded->email ?? $decoded->email_address ?? $decoded->primary_email ?? null;
+            $name = $decoded->name ?? trim(($decoded->first_name ?? '').' '.($decoded->last_name ?? '')) ?: 'Clerk User';
+
             $user = User::firstOrCreate(
                 ['clerk_id' => $clerkId],
                 [
-                    'name' => 'Clerk User', 
-                    'email' => null, 
-                    'password' => null
+                    'name' => $name,
+                    'email' => $email,
                 ]
             );
+
+            // If user existed but didn't have email updated, sync it if present
+            if ($email && $user->email !== $email) {
+                $user->update(['email' => $email]);
+            }
 
             // Log the user in for this request
             Auth::login($user);
@@ -63,6 +68,7 @@ class VerifyClerkToken
 
         } catch (\Exception $e) {
             Log::error('Clerk Token Verification Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['message' => 'Unauthenticated or invalid token.'], 401);
         }
     }

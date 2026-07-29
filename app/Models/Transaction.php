@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Prunable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transaction extends Model
 {
-    use SoftDeletes, Prunable, HasFactory;
+    use HasFactory, Prunable, SoftDeletes;
 
     /** @var string[] */
     protected $fillable = [
@@ -32,41 +33,29 @@ class Transaction extends Model
 
     /** @var array<string, string> */
     protected $casts = [
-        'amount'          => 'decimal:2',
-        'date'            => 'date',
-        'is_split'        => 'boolean',
-        'split_data'      => 'array',
+        'amount' => 'decimal:2',
+        'date' => 'date',
+        'is_split' => 'boolean',
+        'split_data' => 'array',
         'is_reimbursable' => 'boolean',
-        'tags'            => 'array',
+        'tags' => 'array',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function toAccount(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'to_account_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -75,7 +64,7 @@ class Transaction extends Model
     /**
      * Get the prunable model query.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function prunable()
     {

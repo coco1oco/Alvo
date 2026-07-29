@@ -16,16 +16,14 @@ class StoreCategoryRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
-            'name'  => 'required|string|max:100',
-            'type'  => 'required|in:income,expense',
+            'name' => 'required|string|max:100',
+            'type' => 'required|in:income,expense',
             'color' => 'nullable|string|max:7',
-            'icon'  => 'nullable|string|max:50',
+            'icon' => 'nullable|string|max:50',
         ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Budget;
 use App\Http\Requests\StoreBudgetRequest;
+use App\Models\Budget;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,8 +12,7 @@ class BudgetController extends AbstractController
     /**
      * List all budgets for the authenticated user for a given month.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function index(Request $request): JsonResponse
     {
@@ -34,8 +33,8 @@ class BudgetController extends AbstractController
                     ->sum('amount');
 
                 return array_merge($budget->toArray(), [
-                    'spent'      => (float) $spent,
-                    'remaining'  => max(0, (float) $budget->amount - (float) $spent),
+                    'spent' => (float) $spent,
+                    'remaining' => max(0, (float) $budget->amount - (float) $spent),
                     'percentage' => $budget->amount > 0
                         ? round(((float) $spent / (float) $budget->amount) * 100, 1)
                         : 0,
@@ -48,8 +47,7 @@ class BudgetController extends AbstractController
     /**
      * Create or update a budget for the authenticated user.
      *
-     * @param  StoreBudgetRequest $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  StoreBudgetRequest  $request  the incoming HTTP request
      */
     public function store(StoreBudgetRequest $request): JsonResponse
     {
@@ -69,9 +67,8 @@ class BudgetController extends AbstractController
     /**
      * Delete a budget.
      *
-     * @param  Request $request the incoming HTTP request
+     * @param  Request  $request  the incoming HTTP request
      * @param  Budget  $budget  the budget to delete
-     * @return JsonResponse
      */
     public function destroy(Request $request, Budget $budget): JsonResponse
     {

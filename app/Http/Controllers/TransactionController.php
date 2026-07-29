@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
-use App\Models\User;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,8 +17,7 @@ class TransactionController extends AbstractController
     /**
      * List all transactions for the authenticated user with optional filters.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function index(Request $request): JsonResponse
     {
@@ -32,8 +31,8 @@ class TransactionController extends AbstractController
         if ($request->filled('type')) {
             if ($request->type === 'credit_card') {
                 $query->where(function ($q) {
-                    $q->whereHas('account', fn($a) => $a->where('type', 'credit_card'))
-                      ->orWhereHas('toAccount', fn($a) => $a->where('type', 'credit_card'));
+                    $q->whereHas('account', fn ($a) => $a->where('type', 'credit_card'))
+                        ->orWhereHas('toAccount', fn ($a) => $a->where('type', 'credit_card'));
                 });
             } elseif (in_array($request->type, ['income', 'expense', 'transfer'])) {
                 $query->where('type', $request->type);
@@ -44,7 +43,7 @@ class TransactionController extends AbstractController
         if ($request->filled('account_id')) {
             $query->where(function ($q) use ($request) {
                 $q->where('account_id', $request->account_id)
-                  ->orWhere('to_account_id', $request->account_id);
+                    ->orWhere('to_account_id', $request->account_id);
             });
         }
 
@@ -75,8 +74,8 @@ class TransactionController extends AbstractController
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', '%' . $search . '%')
-                  ->orWhere('notes', 'like', '%' . $search . '%');
+                $q->where('description', 'like', '%'.$search.'%')
+                    ->orWhere('notes', 'like', '%'.$search.'%');
             });
         }
 
@@ -88,9 +87,8 @@ class TransactionController extends AbstractController
     /**
      * Create a new transaction and adjust account balances accordingly.
      *
-     * @param  StoreTransactionRequest $request the incoming HTTP request
-     * @param  TransactionService      $service the transaction service
-     * @return JsonResponse
+     * @param  StoreTransactionRequest  $request  the incoming HTTP request
+     * @param  TransactionService  $service  the transaction service
      */
     public function store(StoreTransactionRequest $request, TransactionService $service): JsonResponse
     {
@@ -101,7 +99,7 @@ class TransactionController extends AbstractController
 
         if ($request->hasFile('attachment')) {
             $path = $request->file('attachment')->store('attachments', 'public');
-            $data['attachment_path'] = '/storage/' . $path;
+            $data['attachment_path'] = '/storage/'.$path;
         }
 
         $transaction = $service->createTransaction($request->user(), $data);
@@ -112,10 +110,9 @@ class TransactionController extends AbstractController
     /**
      * Update an existing transaction and reapply balance effects.
      *
-     * @param  UpdateTransactionRequest $request     the incoming HTTP request
-     * @param  Transaction              $transaction the transaction to update
-     * @param  TransactionService       $service     the transaction service
-     * @return JsonResponse
+     * @param  UpdateTransactionRequest  $request  the incoming HTTP request
+     * @param  Transaction  $transaction  the transaction to update
+     * @param  TransactionService  $service  the transaction service
      */
     public function update(UpdateTransactionRequest $request, Transaction $transaction, TransactionService $service): JsonResponse
     {
@@ -128,7 +125,7 @@ class TransactionController extends AbstractController
 
         if ($request->hasFile('attachment')) {
             $path = $request->file('attachment')->store('attachments', 'public');
-            $data['attachment_path'] = '/storage/' . $path;
+            $data['attachment_path'] = '/storage/'.$path;
         }
 
         $updatedTransaction = $service->updateTransaction($request->user(), $transaction, $data);
@@ -196,7 +193,9 @@ class TransactionController extends AbstractController
             $participants = data_get($txn->split_data, 'participants', []);
             foreach ($participants as $idx => $p) {
                 $name = trim((string) ($p['name'] ?? ''));
-                if (! $name) continue;
+                if (! $name) {
+                    continue;
+                }
 
                 $amount = (float) ($p['amount'] ?? 0);
                 $isSettled = ! empty($p['is_settled']);
@@ -254,10 +253,9 @@ class TransactionController extends AbstractController
     /**
      * Delete a transaction and reverse its balance effect.
      *
-     * @param  Request            $request     the incoming HTTP request
-     * @param  Transaction        $transaction the transaction to delete
-     * @param  TransactionService $service     the transaction service
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
+     * @param  Transaction  $transaction  the transaction to delete
+     * @param  TransactionService  $service  the transaction service
      */
     public function destroy(Request $request, Transaction $transaction, TransactionService $service): JsonResponse
     {
@@ -270,9 +268,6 @@ class TransactionController extends AbstractController
 
     /**
      * List soft-deleted transactions for the authenticated user.
-     *
-     * @param  Request $request
-     * @return JsonResponse
      */
     public function trashed(Request $request): JsonResponse
     {
@@ -289,15 +284,12 @@ class TransactionController extends AbstractController
     /**
      * Restore a soft-deleted transaction and reapply its balance effect.
      *
-     * @param  Request            $request
-     * @param  int                $id
-     * @param  TransactionService $service
-     * @return JsonResponse
+     * @param  int  $id
      */
     public function restore(Request $request, $id, TransactionService $service): JsonResponse
     {
         $transaction = $request->user()->transactions()->onlyTrashed()->findOrFail($id);
-        
+
         $service->restoreTransaction($request->user(), $transaction);
 
         return response()->json(['message' => 'Transaction restored']);
@@ -306,9 +298,7 @@ class TransactionController extends AbstractController
     /**
      * Permanently delete a soft-deleted transaction.
      *
-     * @param  Request $request
-     * @param  int     $id
-     * @return JsonResponse
+     * @param  int  $id
      */
     public function forceDelete(Request $request, $id): JsonResponse
     {
@@ -321,8 +311,7 @@ class TransactionController extends AbstractController
     /**
      * Export all transactions for the authenticated user as a CSV file.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return StreamedResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function export(Request $request): StreamedResponse
     {
@@ -333,7 +322,7 @@ class TransactionController extends AbstractController
             ->get();
 
         $headers = [
-            'Content-Type'        => 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="transactions.csv"',
         ];
 
@@ -350,7 +339,7 @@ class TransactionController extends AbstractController
                         $amount = number_format((float) ($participant['amount'] ?? 0), 2, '.', '');
                         $settled = ! empty($participant['is_settled']) ? ' [Settled]' : '';
 
-                        return $name === '' ? null : $name . ' (' . $amount . ')' . $settled;
+                        return $name === '' ? null : $name.' ('.$amount.')'.$settled;
                     })
                     ->filter()
                     ->values()
@@ -374,5 +363,4 @@ class TransactionController extends AbstractController
             fclose($handle);
         }, 200, $headers);
     }
-
 }

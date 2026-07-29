@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\RegisterUserRequest;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\User;
-use App\Http\Requests\RegisterUserRequest;
-use App\Http\Requests\LoginUserRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,16 +44,15 @@ class AuthController extends AbstractController
     /**
      * Register a new user and seed default categories and accounts.
      *
-     * @param  RegisterUserRequest $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  RegisterUserRequest  $request  the incoming HTTP request
      */
     public function register(RegisterUserRequest $request): JsonResponse
     {
         $data = $request->validated();
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
+            'name' => $data['name'],
+            'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
 
@@ -70,7 +69,7 @@ class AuthController extends AbstractController
         Auth::login($user);
 
         return response()->json([
-            'user'    => $user,
+            'user' => $user,
             'message' => 'Registration successful',
         ], 201);
     }
@@ -78,15 +77,15 @@ class AuthController extends AbstractController
     /**
      * Authenticate an existing user.
      *
-     * @param  LoginUserRequest $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  LoginUserRequest  $request  the incoming HTTP request
+     *
      * @throws ValidationException
      */
     public function login(LoginUserRequest $request): JsonResponse
     {
         $credentials = $request->validated();
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -95,7 +94,7 @@ class AuthController extends AbstractController
         $request->session()->regenerate();
 
         return response()->json([
-            'user'    => Auth::user(),
+            'user' => Auth::user(),
             'message' => 'Login successful',
         ]);
     }
@@ -103,8 +102,7 @@ class AuthController extends AbstractController
     /**
      * Log the current user out and invalidate their session.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function logout(Request $request): JsonResponse
     {
@@ -118,8 +116,7 @@ class AuthController extends AbstractController
     /**
      * Return the currently authenticated user.
      *
-     * @param  Request $request the incoming HTTP request
-     * @return JsonResponse
+     * @param  Request  $request  the incoming HTTP request
      */
     public function user(Request $request): JsonResponse
     {

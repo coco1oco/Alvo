@@ -14,13 +14,13 @@ class StoreGoalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'              => 'required|string|max:255',
-            'target_amount'     => 'required|numeric|min:1',
-            'current_amount'    => 'nullable|numeric|min:0',
+            'name' => 'required|string|max:255',
+            'target_amount' => 'required|numeric|min:1',
+            'current_amount' => 'nullable|numeric|min:0',
             'linked_account_id' => 'nullable|exists:accounts,id',
-            'deadline'          => 'nullable|date',
-            'color'             => 'nullable|string|max:7',
-            'icon'              => 'nullable|string|max:50',
+            'deadline' => 'nullable|date',
+            'color' => 'nullable|string|max:7',
+            'icon' => 'nullable|string|max:50',
         ];
     }
 }
