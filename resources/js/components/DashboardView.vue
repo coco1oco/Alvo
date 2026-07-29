@@ -386,6 +386,7 @@ import { ref, onMounted, nextTick, watch, inject, readonly } from 'vue'
 import axios from 'axios'
 import { Chart, registerables } from 'chart.js'
 import TransactionModal from './TransactionModal.vue'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 Chart.register(...registerables)
 
@@ -437,7 +438,7 @@ function animateTo(refVal, target, duration = 900) {
 function durationFor(target) {
   const abs = Math.abs(target || 0)
   if (abs < 10) return 250
-  const log = Math.log10(abs) // 2=100, 3=1K, 4=10K, 5=100K, 6=1M
+  const log = Math.log10(abs)
   return Math.round(Math.min(900, Math.max(250, log * 150)))
 }
 
@@ -446,14 +447,6 @@ function triggerCountUp(d) {
   animateTo(displayIncome,   d.monthly_income  || 0, durationFor(d.monthly_income))
   animateTo(displayExpenses, d.monthly_expense || 0, durationFor(d.monthly_expense))
   animateTo(displayNet,      d.net             || 0, durationFor(d.net))
-}
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 2,
-  }).format(val || 0)
 }
 
 function chartColors() {
@@ -552,7 +545,7 @@ function renderCharts() {
             ticks: {
               color: colors.tick,
               font: { size: 10 },
-              callback: v => '₱' + v.toLocaleString(),
+              callback: v => getCurrencySymbol() + v.toLocaleString(),
             },
             grid: { color: colors.grid },
           },

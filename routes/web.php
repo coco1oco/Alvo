@@ -6,6 +6,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\NetWorthController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SubscriptionController;
@@ -52,4 +53,7 @@ Route::prefix('api')->middleware('clerk')->group(function () {
 
     // Reports & Insights
     Route::get('/reports', [ReportController::class, 'index']);
+
+    // Net Worth Statement
+    Route::get('/net-worth', [NetWorthController::class, 'index']);
 });

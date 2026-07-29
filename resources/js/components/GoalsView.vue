@@ -183,11 +183,11 @@
 
           <div class="form-row-2">
             <div>
-              <label class="label">Target Amount (₱)</label>
+              <label class="label">Target Amount ({{ getCurrencySymbol() }})</label>
               <input v-model="form.target_amount" type="number" step="0.01" min="1" required placeholder="50000" class="input-field" />
             </div>
             <div>
-              <label class="label">Initial Saved (₱)</label>
+              <label class="label">Initial Saved ({{ getCurrencySymbol() }})</label>
               <input v-model="form.current_amount" type="number" step="0.01" min="0" placeholder="0" class="input-field" />
             </div>
           </div>
@@ -241,7 +241,7 @@
 
         <form @submit.prevent="submitDeposit" class="modal-form">
           <div>
-            <label class="label">Deposit Amount (₱)</label>
+            <label class="label">Deposit Amount ({{ getCurrencySymbol() }})</label>
             <input v-model="depositAmount" type="number" step="0.01" min="0.01" required placeholder="1000.00" class="input-field" />
           </div>
 
@@ -261,6 +261,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, inject } from 'vue'
 import axios from 'axios'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 const emit = defineEmits(['refresh'])
 const toast = inject('toast')
@@ -298,10 +299,6 @@ const overallProgress = computed(() => {
   if (!totalTarget.value) return 0
   return Math.min(Math.round((totalSaved.value / totalTarget.value) * 100), 100)
 })
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(val || 0)
-}
 
 function formatDate(d) {
   if (!d) return '—'

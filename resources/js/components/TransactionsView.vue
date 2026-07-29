@@ -233,15 +233,9 @@ const showTrashModal = ref(false)
 const editingTxn   = ref(null)
 let searchTimeout  = null
 
-const filters = reactive({ search: '', type: '', account_id: '', from: '', to: '', page: 1 })
+import { formatCurrency } from '../utils/currency'
 
-function formatCurrency(v) {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 2,
-  }).format(v || 0)
-}
+const filters = reactive({ search: '', type: '', account_id: '', from: '', to: '', page: 1 })
 
 function formatDate(d) {
   return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })

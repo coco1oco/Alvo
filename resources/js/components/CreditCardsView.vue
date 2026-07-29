@@ -312,17 +312,17 @@
           </div>
 
           <div>
-            <label class="label">Credit Limit <span class="label-required">*</span></label>
+            <label class="label">Total Credit Limit <span class="label-required">*</span></label>
             <div class="input-with-prefix">
-              <span class="input-prefix">₱</span>
+              <span class="input-prefix">{{ getCurrencySymbol() }}</span>
               <input v-model="form.credit_limit" type="number" step="0.01" min="1" required placeholder="e.g. 50000" class="input-field input-field--prefix" />
             </div>
           </div>
 
           <div v-if="!editingCard">
-            <label class="label">Current Balance Owed</label>
+            <label class="label">Starting Outstanding Balance <span class="label-optional">(owed on card)</span></label>
             <div class="input-with-prefix">
-              <span class="input-prefix">₱</span>
+              <span class="input-prefix">{{ getCurrencySymbol() }}</span>
               <input v-model="form.balance" type="number" step="0.01" min="0" placeholder="0.00" class="input-field input-field--prefix" />
             </div>
             <p class="field-hint">Enter your current unpaid balance owed on this card.</p>
@@ -396,6 +396,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, inject, watch } from 'vue'
 import axios from 'axios'
 import TransactionModal from './TransactionModal.vue'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 const emit = defineEmits(['refresh'])
 const toast = inject('toast')
@@ -504,10 +505,6 @@ function getUtilizationBarClass(pct) {
 function ordinal(n) {
   const s = ['th','st','nd','rd'], v = n % 100
   return n + (s[(v - 20) % 10] || s[v] || s[0])
-}
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(val || 0)
 }
 
 function toggleAccountMenu(id) {

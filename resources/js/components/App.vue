@@ -145,6 +145,7 @@
             <GoalsView        v-else-if="currentView === 'goals'"        :key="'goals-'        + refreshKey" @refresh="refresh" />
             <SubscriptionsView v-else-if="currentView === 'subscriptions'" :key="'subscriptions-' + refreshKey" @refresh="refresh" />
             <ReportsView      v-else-if="currentView === 'reports'"      :key="'reports-'      + refreshKey" :is-dark="isDark" />
+            <NetWorthView     v-else-if="currentView === 'net-worth'"    :key="'net-worth-'    + refreshKey" :is-dark="isDark" />
             <RecurringTransactionsView v-else-if="currentView === 'recurring'" :key="'recurring-' + refreshKey" @refresh="refresh" />
             <CategoriesView  v-else-if="currentView === 'categories'"  :key="'categories-'  + refreshKey" />
             <BudgetsView     v-else-if="currentView === 'budgets'"     :key="'budgets-'     + refreshKey" />
@@ -190,6 +191,7 @@ import CreditCardsView from './CreditCardsView.vue'
 import GoalsView from './GoalsView.vue'
 import SubscriptionsView from './SubscriptionsView.vue'
 import ReportsView from './ReportsView.vue'
+import NetWorthView from './NetWorthView.vue'
 import RecurringTransactionsView from './RecurringTransactionsView.vue'
 import CategoriesView from './CategoriesView.vue'
 import BudgetsView from './BudgetsView.vue'
@@ -197,6 +199,12 @@ import BudgetsView from './BudgetsView.vue'
 import SettingsView from './SettingsView.vue'
 
 // ── Inline SVG Icon Components ────────────────────────────────
+const IconNetWorth = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
+      d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m3 0h1m-1-4h.01M9 16h.01M15 12h.01M9 12h.01M15 8h.01M9 8h.01' })
+  ])
+})
 const IconDashboard = defineComponent({
   render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
     h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
@@ -334,6 +342,7 @@ const navItems = [
   { view: 'goals',         label: 'Goals',         icon: IconGoals },
   { view: 'subscriptions', label: 'Subscriptions', icon: IconSubscriptions },
   { view: 'reports',       label: 'Reports',       icon: IconReports },
+  { view: 'net-worth',     label: 'Net Worth',     icon: IconNetWorth },
   { view: 'recurring',     label: 'Recurring',     icon: IconRecurring },
   { view: 'categories',    label: 'Categories',    icon: IconCategories },
   { view: 'budgets',       label: 'Budgets',       icon: IconBudgets },

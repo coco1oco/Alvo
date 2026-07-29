@@ -176,6 +176,7 @@
 import { ref, computed, onMounted, watch, nextTick, inject } from 'vue'
 import axios from 'axios'
 import { Chart, registerables } from 'chart.js'
+import { formatCurrency } from '../utils/currency'
 
 Chart.register(...registerables)
 
@@ -206,10 +207,6 @@ const periods = [
   { label: 'This Year', value: 'this_year' },
   { label: 'Custom Range', value: 'custom' },
 ]
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(val || 0)
-}
 
 function savingsRateText(rate) {
   if (rate >= 30) return 'Excellent'

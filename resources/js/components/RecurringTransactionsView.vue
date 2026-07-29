@@ -190,7 +190,7 @@
           <!-- Amount + Frequency -->
           <div class="form-row-2">
             <div>
-              <label class="label">Amount (₱)</label>
+              <label class="label">Amount ({{ getCurrencySymbol() }})</label>
               <input v-model="form.amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="input-field" />
             </div>
             <div>
@@ -242,6 +242,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 const emit = defineEmits(['refresh'])
 const toast = inject('toast')
@@ -290,10 +291,6 @@ const dueSoonItems = computed(() => {
     return due <= sevenDays
   })
 })
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(val || 0)
-}
 
 function formatDate(d) {
   if (!d) return '—'

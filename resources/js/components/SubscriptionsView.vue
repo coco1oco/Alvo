@@ -60,7 +60,7 @@
           >
             <span class="w-3 h-3 rounded-full flex-shrink-0" :style="{ backgroundColor: preset.color }"></span>
             <span class="font-semibold text-xs text-primary-color">{{ preset.name }}</span>
-            <span class="text-[11px] text-muted">₱{{ preset.amount }}</span>
+            <span class="text-[11px] text-muted">{{ formatCurrency(preset.amount) }}</span>
           </button>
         </div>
       </div>
@@ -154,7 +154,7 @@
 
           <div class="form-row-2">
             <div>
-              <label class="label">Amount (₱)</label>
+              <label class="label">Amount ({{ getCurrencySymbol() }})</label>
               <input v-model="form.amount" type="number" step="0.01" min="0.01" required placeholder="549.00" class="input-field" />
             </div>
             <div>
@@ -204,6 +204,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 const emit = defineEmits(['refresh'])
 const toast = inject('toast')
@@ -245,10 +246,6 @@ const renewingSoon = computed(() => {
   const sevenDays = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
   return activeSubs.value.filter(s => new Date(s.next_renewal_date) <= sevenDays)
 })
-
-function formatCurrency(val) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(val || 0)
-}
 
 function formatDate(d) {
   if (!d) return '—'

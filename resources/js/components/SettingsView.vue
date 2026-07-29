@@ -175,6 +175,7 @@ import { useUser } from '@clerk/vue'
 import { 
   UserIcon, AdjustmentsHorizontalIcon, SwatchIcon, CircleStackIcon, ArrowDownTrayIcon
 } from '@heroicons/vue/24/outline'
+import { currentCurrency, setGlobalCurrency } from '../utils/currency'
 
 const { user } = useUser()
 const toast = inject('toast')
@@ -189,7 +190,7 @@ const accounts = ref([])
 const currentTheme = computed(() => props.isDark ? 'dark' : 'light')
 
 const preferences = reactive({
-  currency: localStorage.getItem('alvo_pref_currency') || 'PHP',
+  currency: currentCurrency.value || 'PHP',
   defaultAccountId: localStorage.getItem('alvo_pref_default_account') || '',
   weekStart: localStorage.getItem('alvo_pref_week_start') || 'sunday'
 })
@@ -204,10 +205,10 @@ async function fetchAccounts() {
 }
 
 function savePreferences() {
-  localStorage.setItem('alvo_pref_currency', preferences.currency)
+  setGlobalCurrency(preferences.currency)
   localStorage.setItem('alvo_pref_default_account', preferences.defaultAccountId)
   localStorage.setItem('alvo_pref_week_start', preferences.weekStart)
-  toast('Preferences updated')
+  toast(`Currency updated to ${preferences.currency}`)
 }
 
 function setTheme(mode) {

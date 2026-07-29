@@ -288,10 +288,10 @@
           <div v-if="!editingAcc">
             <label class="label">{{ form.type === 'credit_card' ? 'Current Balance Owed' : 'Starting Balance' }}</label>
             <div class="input-with-prefix">
-              <span class="input-prefix">₱</span>
+              <span class="input-prefix">{{ getCurrencySymbol() }}</span>
               <input v-model="form.balance" type="number" step="0.01" min="0" placeholder="0.00" class="input-field input-field--prefix" />
             </div>
-            <p v-if="form.type === 'credit_card'" class="field-hint">Enter how much you currently owe on this card (e.g. ₱5,000).</p>
+            <p v-if="form.type === 'credit_card'" class="field-hint">Enter how much you currently owe on this card.</p>
           </div>
 
           <!-- Credit Card specific fields -->
@@ -299,7 +299,7 @@
             <div>
               <label class="label">Credit Limit <span class="label-required">*</span></label>
               <div class="input-with-prefix">
-                <span class="input-prefix">₱</span>
+                <span class="input-prefix">{{ getCurrencySymbol() }}</span>
                 <input v-model="form.credit_limit" type="number" step="0.01" min="1"
                        :required="form.type === 'credit_card'"
                        placeholder="e.g. 50000" class="input-field input-field--prefix" />
@@ -373,6 +373,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, inject, defineComponent, h, watch } from 'vue'
 import axios from 'axios'
 import TransactionModal from './TransactionModal.vue'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 const emit       = defineEmits(['refresh'])
 const toast      = inject('toast')
@@ -580,10 +581,6 @@ const IconFolder = defineComponent({
 function accountIcon(type) {
   const map = { cash: IconWallet, bank: IconBank, savings: IconBank, credit_card: IconCreditCard, other: IconFolder }
   return map[type] || IconWallet
-}
-
-function formatCurrency(v) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(v || 0)
 }
 
 async function fetchAccounts() {

@@ -78,7 +78,7 @@
         <!-- Amount + Date -->
         <div class="form-row">
           <div class="form-col">
-            <label class="label">Amount (₱)</label>
+            <label class="label">Amount ({{ getCurrencySymbol() }})</label>
             <input v-model="form.amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="input-field" />
           </div>
           <div class="form-col">
@@ -126,6 +126,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 
 const props = defineProps({
   transaction:     { type: Object, default: null },
@@ -187,10 +188,6 @@ const submitClass = computed(() => {
   if (form.type === 'expense')  return 'submit-btn--expense'
   return 'submit-btn--transfer'
 })
-
-function formatCurrency(v) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0 }).format(v || 0)
-}
 
 function formatAccountOption(acc) {
   if (!acc) return ''

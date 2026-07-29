@@ -200,7 +200,7 @@
             </select>
           </div>
           <div>
-            <label class="label">Monthly Limit (₱)</label>
+            <label class="label">Monthly Limit ({{ getCurrencySymbol() }})</label>
             <input v-model="form.amount" type="number" step="0.01" min="1" required placeholder="e.g. 5000" class="input-field" />
           </div>
           <div>
@@ -223,6 +223,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
+import { formatCurrency, getCurrencySymbol } from '../utils/currency'
 import { 
   ShoppingCartIcon, HomeIcon, BoltIcon, ArrowPathIcon, ShoppingBagIcon, BanknotesIcon, BeakerIcon, TruckIcon, SparklesIcon, TagIcon
 } from '@heroicons/vue/24/outline'
@@ -277,10 +278,6 @@ function getCategoryIcon(name = '') {
   if (n.includes('trans') || n.includes('gas') || n.includes('car') || n.includes('ride')) return TruckIcon
   if (n.includes('eat') || n.includes('din') || n.includes('rest') || n.includes('food')) return SparklesIcon
   return TagIcon
-}
-
-function formatCurrency(v) {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(v || 0)
 }
 
 async function fetchBudgets() {

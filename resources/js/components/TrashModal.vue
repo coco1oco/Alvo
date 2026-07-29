@@ -72,19 +72,12 @@
 <script setup>
 import { ref, onMounted, inject } from 'vue'
 import axios from 'axios'
+import { formatCurrency } from '../utils/currency'
 
 const emit = defineEmits(['close', 'restored'])
 const toast = inject('toast')
 const loading = ref(true)
 const transactions = ref([])
-
-function formatCurrency(v) {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 2,
-  }).format(v || 0)
-}
 
 function formatDate(d) {
   return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
