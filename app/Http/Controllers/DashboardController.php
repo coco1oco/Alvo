@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,7 @@ class DashboardController extends AbstractController
             ->whereIn('type', ['income', 'expense'])
             ->get();
 
-        $cashflowRaw = $recentTxns->groupBy(fn ($t) => \Carbon\Carbon::parse($t->date)->format('Y-m'));
+        $cashflowRaw = $recentTxns->groupBy(fn ($t) => Carbon::parse($t->date)->format('Y-m'));
 
         $cashflow = [];
         for ($i = 5; $i >= 0; $i--) {

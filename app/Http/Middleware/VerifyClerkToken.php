@@ -45,7 +45,7 @@ class VerifyClerkToken
 
             // Validate Issuer (iss) and Authorized Party (azp) / Audience (aud)
             $issuer = $decoded->iss ?? '';
-            if (!str_contains($issuer, 'clerk')) {
+            if (! str_contains($issuer, 'clerk')) {
                 throw new \RuntimeException('Invalid token issuer.');
             }
 
