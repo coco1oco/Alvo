@@ -305,6 +305,69 @@
           </div>
         </div>
 
+        <!-- Savings Goals Panel -->
+        <div v-if="data.goals?.length" class="glass-card card-panel col-span-full">
+          <div class="card-panel-header">
+            <div>
+              <h2 class="card-panel-title flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Savings Goals
+              </h2>
+            </div>
+            <button @click="emit('navigate', 'goals')" class="btn-ghost text-xs">View all goals →</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+            <div v-for="goal in data.goals" :key="goal.id" class="p-3 rounded-xl bg-bg-surface-2/60 border border-border/50 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <h4 class="font-bold text-xs text-primary-color truncate">{{ goal.name }}</h4>
+                  <span class="text-[10px] font-bold" :class="goal.progress_percentage >= 100 ? 'text-success' : 'text-primary'">
+                    {{ goal.progress_percentage }}%
+                  </span>
+                </div>
+                <p class="text-[11px] text-muted mb-2">
+                  <strong class="text-primary-color">{{ formatCurrency(goal.effective_current_amount) }}</strong> / {{ formatCurrency(goal.target_amount) }}
+                </p>
+                <div class="overall-progress-bar" style="height: 4px;">
+                  <div class="overall-progress-fill" :style="{ width: goal.progress_percentage + '%', backgroundColor: goal.color || '#6366f1' }"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Subscriptions Panel -->
+        <div v-if="data.subscriptions?.length" class="glass-card card-panel col-span-full">
+          <div class="card-panel-header">
+            <div>
+              <h2 class="card-panel-title flex items-center gap-2">
+                <svg class="w-4 h-4 text-secondary-color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Active Subscriptions
+              </h2>
+            </div>
+            <button @click="emit('navigate', 'subscriptions')" class="btn-ghost text-xs">Manage Subscriptions →</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mt-3">
+            <div v-for="sub in data.subscriptions" :key="sub.id" class="p-3 rounded-xl bg-bg-surface-2/60 border border-border/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0"
+                     :style="{ backgroundColor: (sub.color || '#6366f1') + '25', color: sub.color || '#6366f1' }">
+                  <span class="font-bold text-[10px] uppercase">{{ sub.name.substring(0, 2) }}</span>
+                </div>
+                <div class="truncate">
+                  <h4 class="font-bold text-xs text-primary-color truncate">{{ sub.name }}</h4>
+                  <p class="text-[10px] text-muted">Renews {{ formatDate(sub.next_renewal_date) }}</p>
+                </div>
+              </div>
+              <span class="font-bold text-xs amount-negative tabular-nums flex-shrink-0 ml-2">−{{ formatCurrency(sub.amount) }}</span>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>

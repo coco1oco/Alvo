@@ -5,7 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoalController;
 use App\Http\Controllers\RecurringTransactionController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,4 +42,14 @@ Route::prefix('api')->middleware('clerk')->group(function () {
     // Recurring Transactions
     Route::post('/recurring-transactions/{recurringTransaction}/process', [RecurringTransactionController::class, 'process']);
     Route::apiResource('recurring-transactions', RecurringTransactionController::class);
+
+    // Savings Goals
+    Route::post('/goals/{goal}/deposit', [GoalController::class, 'deposit']);
+    Route::apiResource('goals', GoalController::class);
+
+    // Subscriptions
+    Route::apiResource('subscriptions', SubscriptionController::class);
+
+    // Reports & Insights
+    Route::get('/reports', [ReportController::class, 'index']);
 });

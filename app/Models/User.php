@@ -80,4 +80,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(RecurringTransaction::class);
     }
+
+    /**
+     * @return HasMany
+     */
+    public function goals(): HasMany
+    {
+        return $this->hasMany(Goal::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
 }

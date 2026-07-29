@@ -126,6 +126,21 @@ class DashboardController extends AbstractController
             ->limit(5)
             ->get();
 
+        // Top active savings goals
+        $goals = $user->goals()
+            ->with(['linkedAccount'])
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get();
+
+        // Active subscriptions
+        $subscriptions = $user->subscriptions()
+            ->with(['account', 'category'])
+            ->where('is_active', true)
+            ->orderBy('next_renewal_date', 'asc')
+            ->limit(5)
+            ->get();
+
         return response()->json([
             'total_balance'       => (float) $totalBalance,
             'monthly_income'      => (float) $monthlyIncome,
@@ -137,6 +152,8 @@ class DashboardController extends AbstractController
             'budgets'             => $budgets,
             'recent_transactions' => $recentTransactions,
             'upcoming_bills'      => $upcomingBills,
+            'goals'               => $goals,
+            'subscriptions'       => $subscriptions,
         ]);
     }
 }
