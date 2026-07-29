@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -19,17 +20,28 @@ class TransactionService
     {
         $account = $user->accounts()->findOrFail($data['account_id']);
 
+        // Block transfers FROM a credit card — cards cannot be a funding source.
+        if ($data['type'] === 'transfer' && $account->type === 'credit_card') {
+            abort(422, 'Transfers cannot originate from a credit card account. Use "Pay Bill" to pay down a card.');
+        }
+
         return DB::transaction(function () use ($user, $data, $account) {
             $transaction = $user->transactions()->create($data);
 
-            // Adjust balances
             match ($data['type']) {
-                'income'   => $account->adjustBalance((float) $data['amount']),
-                'expense'  => $account->adjustBalance(-(float) $data['amount']),
+                'income'   => $this->adjustBalance($account, 'income', (float) $data['amount']),
+                'expense'  => $this->adjustBalance($account, 'expense', (float) $data['amount']),
                 'transfer' => (function () use ($data, $account, $user) {
                     $toAccount = $user->accounts()->findOrFail($data['to_account_id']);
-                    $account->adjustBalance(-(float) $data['amount']);
-                    $toAccount->adjustBalance((float) $data['amount']);
+                    // Deduct from source (always a non-CC account at this point)
+                    $this->adjustBalance($account, 'expense', (float) $data['amount']);
+                    // Credit card receiving a transfer = "Pay Bill" = debt reduction
+                    // Regular account receiving = deposit
+                    if ($toAccount->type === 'credit_card') {
+                        $toAccount->adjustBalance(-(float) $data['amount']); // debt decreases
+                    } else {
+                        $toAccount->adjustBalance((float) $data['amount']);  // balance increases
+                    }
                 })(),
             };
 
@@ -104,12 +116,19 @@ class TransactionService
         if (!$account) return;
 
         match ($transaction->type) {
-            'income'   => $account->adjustBalance(-(float) $transaction->amount),
-            'expense'  => $account->adjustBalance((float) $transaction->amount),
+            'income'   => $this->adjustBalance($account, 'income', -(float) $transaction->amount),
+            'expense'  => $this->adjustBalance($account, 'expense', -(float) $transaction->amount),
             'transfer' => (function () use ($user, $transaction, $account) {
+                // Restore source account
+                $this->adjustBalance($account, 'expense', -(float) $transaction->amount);
                 $toAccount = $user->accounts()->find($transaction->to_account_id);
-                $account->adjustBalance((float) $transaction->amount);
-                if ($toAccount) $toAccount->adjustBalance(-(float) $transaction->amount);
+                if ($toAccount) {
+                    if ($toAccount->type === 'credit_card') {
+                        $toAccount->adjustBalance((float) $transaction->amount); // re-add debt
+                    } else {
+                        $toAccount->adjustBalance(-(float) $transaction->amount); // remove deposit
+                    }
+                }
             })(),
         };
     }
@@ -127,13 +146,51 @@ class TransactionService
         if (!$account) return;
 
         match ($transaction->type) {
-            'income'   => $account->adjustBalance((float) $transaction->amount),
-            'expense'  => $account->adjustBalance(-(float) $transaction->amount),
+            'income'   => $this->adjustBalance($account, 'income', (float) $transaction->amount),
+            'expense'  => $this->adjustBalance($account, 'expense', (float) $transaction->amount),
             'transfer' => (function () use ($user, $transaction, $account) {
+                $this->adjustBalance($account, 'expense', (float) $transaction->amount);
                 $toAccount = $user->accounts()->find($transaction->to_account_id);
-                $account->adjustBalance(-(float) $transaction->amount);
-                if ($toAccount) $toAccount->adjustBalance((float) $transaction->amount);
+                if ($toAccount) {
+                    if ($toAccount->type === 'credit_card') {
+                        $toAccount->adjustBalance(-(float) $transaction->amount); // pay down debt
+                    } else {
+                        $toAccount->adjustBalance((float) $transaction->amount);
+                    }
+                }
             })(),
         };
+    }
+
+    /**
+     * Apply a signed balance adjustment to an account, respecting credit card polarity.
+     *
+     * Credit card balance = outstanding debt (stored as positive).
+     *   income  on CC → debt DECREASES (refund/cashback posted to card)
+     *   expense on CC → debt INCREASES  (charge to the card)
+     *
+     * Regular account balance = funds available (stored as positive).
+     *   income  → balance INCREASES
+     *   expense → balance DECREASES
+     *
+     * Pass a negative $amount to reverse/undo an effect.
+     *
+     * @param  Account $account the account to adjust
+     * @param  string  $type    'income' or 'expense'
+     * @param  float   $amount  the raw amount (positive = apply, negative = reverse)
+     * @return void
+     */
+    private function adjustBalance(Account $account, string $type, float $amount): void
+    {
+        if ($account->type === 'credit_card') {
+            // For credit cards the sign is inverted relative to normal accounts.
+            // expense → debt goes UP (+amount), income → debt goes DOWN (-amount)
+            $delta = ($type === 'expense') ? $amount : -$amount;
+        } else {
+            // For regular accounts: income → balance UP, expense → balance DOWN
+            $delta = ($type === 'income') ? $amount : -$amount;
+        }
+
+        $account->adjustBalance($delta);
     }
 }

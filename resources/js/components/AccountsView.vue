@@ -126,6 +126,14 @@
                       </svg>
                       Add Transaction
                     </button>
+                    <!-- Pay Bill shortcut — credit cards only -->
+                    <button v-if="acc.type === 'credit_card'" @click="openPayBill(acc); activeMenuId = null" class="dropdown-item dropdown-item--paybill">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      Pay Bill
+                    </button>
                     <button @click="openModal(acc); activeMenuId = null" class="dropdown-item">
                       <svg class="w-4 h-4 text-secondary-color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -155,12 +163,29 @@
 
               <!-- Credit Card Gauge OR Proportion Bar -->
               <div v-if="acc.type === 'credit_card'" class="credit-gauge-section mt-3">
-                <div class="flex justify-between text-xs font-semibold text-muted mb-1">
+                <div class="flex justify-between text-xs font-semibold mb-1"
+                     :class="getCreditUtilizationClass(acc)">
                   <span>{{ getCreditUsedPct(acc) }}% used</span>
                   <span>{{ formatCurrency(getCreditAvailable(acc)) }} left</span>
                 </div>
                 <div class="proportion-bar-wrapper">
-                  <div class="proportion-bar" :style="{ width: getCreditUsedPct(acc) + '%', backgroundColor: acc.color }"></div>
+                  <div class="proportion-bar"
+                       :class="getCreditBarClass(acc)"
+                       :style="{ width: getCreditUsedPct(acc) + '%' }"></div>
+                </div>
+                <!-- High utilization warning -->
+                <div v-if="getCreditUsedPct(acc) >= 75" class="credit-warning-badge mt-1.5">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  {{ getCreditUsedPct(acc) >= 100 ? 'Limit Reached' : 'High Utilization' }}
+                </div>
+                <!-- Billing info -->
+                <div v-if="acc.credit_limit" class="credit-limit-display mt-1">
+                  Limit: {{ formatCurrency(acc.credit_limit) }}
+                  <template v-if="acc.billing_cycle_day"> &nbsp;·&nbsp; Cuts on the {{ ordinal(acc.billing_cycle_day) }}</template>
+                  <template v-if="acc.due_date_day"> &nbsp;·&nbsp; Due on the {{ ordinal(acc.due_date_day) }}</template>
                 </div>
               </div>
               <div v-else class="proportion-bar-wrapper mt-4">
@@ -261,12 +286,40 @@
             </select>
           </div>
           <div v-if="!editingAcc">
-            <label class="label">{{ form.type === 'credit_card' ? 'Outstanding Balance' : 'Starting Balance' }}</label>
+            <label class="label">{{ form.type === 'credit_card' ? 'Current Balance Owed' : 'Starting Balance' }}</label>
             <div class="input-with-prefix">
               <span class="input-prefix">₱</span>
-              <input v-model="form.balance" type="number" step="0.01" placeholder="0.00" class="input-field input-field--prefix" />
+              <input v-model="form.balance" type="number" step="0.01" min="0" placeholder="0.00" class="input-field input-field--prefix" />
             </div>
+            <p v-if="form.type === 'credit_card'" class="field-hint">Enter how much you currently owe on this card (e.g. ₱5,000).</p>
           </div>
+
+          <!-- Credit Card specific fields -->
+          <template v-if="form.type === 'credit_card'">
+            <div>
+              <label class="label">Credit Limit <span class="label-required">*</span></label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₱</span>
+                <input v-model="form.credit_limit" type="number" step="0.01" min="1"
+                       :required="form.type === 'credit_card'"
+                       placeholder="e.g. 50000" class="input-field input-field--prefix" />
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div>
+                <label class="label">Billing Cycle Day <span class="label-optional">(optional)</span></label>
+                <input v-model="form.billing_cycle_day" type="number" min="1" max="28"
+                       placeholder="e.g. 25" class="input-field" />
+                <p class="field-hint">Day of month your statement closes.</p>
+              </div>
+              <div>
+                <label class="label">Payment Due Day <span class="label-optional">(optional)</span></label>
+                <input v-model="form.due_date_day" type="number" min="1" max="28"
+                       placeholder="e.g. 15" class="input-field" />
+                <p class="field-hint">Day of month payment is due.</p>
+              </div>
+            </div>
+          </template>
           <div>
             <div class="color-picker-header">
               <label class="label label-no-mb">Color</label>
@@ -304,6 +357,15 @@
       @close="showTransactionModal = false" 
       @saved="onTransactionSaved" 
     />
+
+    <!-- Pay Bill Modal — pre-filled transfer TO the credit card -->
+    <TransactionModal
+      v-if="showPayBillModal"
+      :payBillTargetId="payBillTargetId"
+      :payBillAmount="payBillAmount"
+      @close="showPayBillModal = false"
+      @saved="onPayBillSaved"
+    />
   </div>
 </template>
 
@@ -327,6 +389,11 @@ const showTransactionModal = ref(false)
 const quickTransactionAccountId = ref('')
 const activeMenuId = ref(null)
 
+// Pay Bill modal state
+const showPayBillModal = ref(false)
+const payBillTargetId  = ref(null)
+const payBillAmount    = ref(0)
+
 function toggleAccountMenu(id) {
   activeMenuId.value = activeMenuId.value === id ? null : id
 }
@@ -343,19 +410,39 @@ function formatAccountSubtag(acc) {
 }
 
 function getCreditLimit(acc) {
-  return parseFloat(acc.credit_limit || 50000)
+  return parseFloat(acc.credit_limit) || 0
 }
 
 function getCreditUsedPct(acc) {
   const limit = getCreditLimit(acc)
-  const used = Math.abs(parseFloat(acc.balance) || 0)
+  if (!limit) return 0
+  const used = Math.max(parseFloat(acc.balance) || 0, 0)
   return Math.min(Math.round((used / limit) * 100), 100)
 }
 
 function getCreditAvailable(acc) {
   const limit = getCreditLimit(acc)
-  const used = Math.abs(parseFloat(acc.balance) || 0)
+  const used  = Math.max(parseFloat(acc.balance) || 0, 0)
   return Math.max(limit - used, 0)
+}
+
+function getCreditUtilizationClass(acc) {
+  const pct = getCreditUsedPct(acc)
+  if (pct >= 75) return 'text-danger'
+  if (pct >= 30) return 'text-warning'
+  return 'text-muted'
+}
+
+function getCreditBarClass(acc) {
+  const pct = getCreditUsedPct(acc)
+  if (pct >= 75) return 'proportion-bar--danger'
+  if (pct >= 30) return 'proportion-bar--warning'
+  return 'proportion-bar--safe'
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'], v = n % 100
+  return n + (s[(v - 20) % 10] || s[v] || s[0])
 }
 
 const colorPalette = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#f59e0b','#22c55e','#10b981','#06b6d4','#3b82f6','#64748b','#0ea5e9']
@@ -382,7 +469,7 @@ const bankKeywords = [
   { keys: ['union bank of the philippines', 'union bank', 'unionbank'], brand: 'UnionBank', icon: 'union-bank-of-the-philippines.svg', color: '#ED6322' },
   { keys: ['transferwise', 'wise'], brand: 'Wise', icon: 'wise.svg', color: '#00B9FF' }
 ]
-const form = reactive({ name: '', type: 'cash', balance: '', color: '#6366f1', icon: 'wallet' })
+const form = reactive({ name: '', type: 'cash', balance: '', credit_limit: '', billing_cycle_day: '', due_date_day: '', color: '#6366f1', icon: 'wallet' })
 
 const activeAccounts = computed(() => accounts.value.filter(a => !a.is_archived))
 const archivedAccounts = computed(() => accounts.value.filter(a => a.is_archived))
@@ -395,15 +482,20 @@ const groupedAccounts = computed(() => {
   }
 })
 
-const totalAssets = computed(() => activeAccounts.value.filter(a => parseFloat(a.balance) > 0).reduce((s, a) => s + parseFloat(a.balance), 0))
-const totalLiabilities = computed(() => activeAccounts.value.filter(a => parseFloat(a.balance) < 0).reduce((s, a) => s + Math.abs(parseFloat(a.balance)), 0))
+const totalAssets      = computed(() => activeAccounts.value
+  .filter(a => a.type !== 'credit_card' && parseFloat(a.balance) > 0)
+  .reduce((s, a) => s + parseFloat(a.balance), 0))
+// CC balances are stored as positive outstanding debt → they are liabilities
+const totalLiabilities = computed(() => activeAccounts.value
+  .filter(a => a.type === 'credit_card')
+  .reduce((s, a) => s + Math.max(parseFloat(a.balance), 0), 0))
 const totalBalance = computed(() => totalAssets.value - totalLiabilities.value)
 
 function getProportion(acc) {
   const bal = parseFloat(acc.balance) || 0
   if (bal === 0) return 0
-  if (bal > 0 && totalAssets.value > 0) return (bal / totalAssets.value) * 100
-  if (bal < 0 && totalLiabilities.value > 0) return (Math.abs(bal) / totalLiabilities.value) * 100
+  // For non-CC accounts: proportion of total assets
+  if (acc.type !== 'credit_card' && totalAssets.value > 0) return (bal / totalAssets.value) * 100
   return 0
 }
 
@@ -418,9 +510,22 @@ function onTransactionSaved() {
   emit('refresh')
 }
 
+function openPayBill(acc) {
+  // Pre-fill a transfer TO the credit card with the full outstanding balance
+  quickTransactionAccountId.value = ''
+  payBillTargetId.value = acc.id
+  payBillAmount.value   = parseFloat(acc.balance) || 0
+  showPayBillModal.value = true
+}
+
+function onPayBillSaved() {
+  showPayBillModal.value = false
+  fetchAccounts()
+  emit('refresh')
+}
 const displayPalette = computed(() => {
-  if (colorPalette.includes(form.color)) return colorPalette;
-  return [...colorPalette, form.color];
+  if (colorPalette.includes(form.color)) return colorPalette
+  return [...colorPalette, form.color]
 })
 
 watch(() => form.name, (newName) => {
@@ -495,9 +600,18 @@ function openModal(acc = null) {
   editingAcc.value = acc
   formError.value  = ''
   if (acc) {
-    Object.assign(form, { name: acc.name, type: acc.type, balance: '', color: acc.color, icon: acc.icon || 'wallet' })
+    Object.assign(form, {
+      name:               acc.name,
+      type:               acc.type,
+      balance:            '',
+      credit_limit:       acc.credit_limit ?? '',
+      billing_cycle_day:  acc.billing_cycle_day ?? '',
+      due_date_day:       acc.due_date_day ?? '',
+      color:              acc.color,
+      icon:               acc.icon || 'wallet',
+    })
   } else {
-    Object.assign(form, { name: '', type: 'cash', balance: '', color: '#6366f1', icon: 'wallet' })
+    Object.assign(form, { name: '', type: 'cash', balance: '', credit_limit: '', billing_cycle_day: '', due_date_day: '', color: '#6366f1', icon: 'wallet' })
   }
   showColors.value = false
   showModal.value = true
@@ -520,13 +634,18 @@ async function saveAccount() {
     // Title case any remaining words
     formattedName = formattedName.replace(/(^\w|\s\w)/g, m => m.toUpperCase())
 
-    const payload = { name: formattedName, type: form.type, color: form.color, icon: form.icon }
+    const payload = {
+      name:               formattedName,
+      type:               form.type,
+      color:              form.color,
+      icon:               form.icon,
+      credit_limit:       form.type === 'credit_card' ? (parseFloat(form.credit_limit) || null) : null,
+      billing_cycle_day:  form.billing_cycle_day ? parseInt(form.billing_cycle_day) : null,
+      due_date_day:       form.due_date_day ? parseInt(form.due_date_day) : null,
+    }
     if (!editingAcc.value) {
-      let bal = parseFloat(form.balance) || 0
-      // Credit card balances are treated as debt (negative)
-      if (form.type === 'credit_card' && bal !== 0) {
-        bal = -Math.abs(bal)
-      }
+      // CC balances are stored as positive outstanding debt
+      const bal = Math.abs(parseFloat(form.balance) || 0)
       payload.balance = bal
     }
 
@@ -1077,9 +1196,65 @@ onUnmounted(() => {
   background-color: var(--danger-light);
 }
 
+.dropdown-item--paybill {
+  color: var(--primary);
+}
+
+.dropdown-item--paybill:hover {
+  background-color: var(--primary-light);
+}
+
 .dropdown-divider {
   height: 1px;
   background: var(--border);
   margin: 0.25rem 0;
 }
+
+/* ── Credit Card Utilization Bar Colors ──────────────────── */
+.proportion-bar--safe    { background-color: var(--success); }
+.proportion-bar--warning { background-color: var(--warning, #f59e0b); }
+.proportion-bar--danger  { background-color: var(--danger); }
+
+/* ── Credit Warning Badge ────────────────────────────────── */
+.credit-warning-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--danger);
+  background-color: var(--danger-light);
+  border-radius: 999px;
+  padding: 0.125rem 0.5rem;
+}
+
+/* ── Credit Limit Info Display ───────────────────────────── */
+.credit-limit-display {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* ── Field Hints ─────────────────────────────────────────── */
+.field-hint {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 0;
+  line-height: 1.4;
+}
+
+/* ── Required label star ─────────────────────────────────── */
+.label-required {
+  color: var(--danger);
+  margin-left: 0.125rem;
+}
+
+/* ── Two-column form row ─────────────────────────────────── */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
 </style>

@@ -37,11 +37,14 @@ class AccountController extends AbstractController
         $data = $request->validated();
 
         $account = $request->user()->accounts()->create([
-            'name'    => $data['name'],
-            'type'    => $data['type'],
-            'balance' => $data['balance'] ?? 0,
-            'color'   => $data['color'] ?? '#6366f1',
-            'icon'    => $data['icon'] ?? 'wallet',
+            'name'              => $data['name'],
+            'type'              => $data['type'],
+            'balance'           => $data['balance'] ?? 0,
+            'credit_limit'      => $data['credit_limit'] ?? null,
+            'billing_cycle_day' => $data['billing_cycle_day'] ?? null,
+            'due_date_day'      => $data['due_date_day'] ?? null,
+            'color'             => $data['color'] ?? '#6366f1',
+            'icon'              => $data['icon'] ?? 'wallet',
         ]);
 
         return response()->json($account, 201);

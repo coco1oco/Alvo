@@ -12,6 +12,15 @@
       </div>
 
       <form @submit.prevent="submit" class="modal-form">
+        <!-- Pay Bill banner -->
+        <div v-if="isPayBillMode" class="pay-bill-banner">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          Pay Bill — Select which bank account to pay from. The amount will reduce your card balance.
+        </div>
+
         <!-- Type Selector -->
         <div>
           <label class="label">Type</label>
@@ -20,8 +29,9 @@
               type="button"
               v-for="t in ['income', 'expense', 'transfer']"
               :key="t"
-              @click="form.type = t"
-              :class="['type-btn', typeClass(t)]"
+              @click="!isPayBillMode && (form.type = t)"
+              :class="['type-btn', typeClass(t), isPayBillMode && form.type !== t ? 'type-btn--disabled' : '']"
+              :disabled="isPayBillMode"
             >{{ t }}</button>
           </div>
         </div>
@@ -31,8 +41,13 @@
           <label class="label">{{ form.type === 'transfer' ? 'From Account' : 'Account' }}</label>
           <select v-model="form.account_id" required class="input-field">
             <option value="">Select account...</option>
-            <option v-for="acc in accounts" :key="acc.id" :value="acc.id">
-              {{ acc.name }} ({{ formatCurrency(acc.balance) }})
+            <!-- In transfer mode: only non-CC accounts can be the source -->
+            <option
+              v-for="acc in (form.type === 'transfer' ? sourceAccounts : accounts)"
+              :key="acc.id"
+              :value="acc.id"
+            >
+              {{ formatAccountOption(acc) }}
             </option>
           </select>
         </div>
@@ -40,14 +55,15 @@
         <!-- To Account (transfer only) -->
         <div v-if="form.type === 'transfer'">
           <label class="label">To Account</label>
-          <select v-model="form.to_account_id" required class="input-field">
+          <select v-model="form.to_account_id" required class="input-field" :disabled="isPayBillMode">
             <option value="">Select destination...</option>
             <option
-              v-for="acc in accounts.filter(a => a.id !== form.account_id)"
+              v-for="acc in destinationAccounts"
               :key="acc.id"
               :value="acc.id"
-            >{{ acc.name }} ({{ formatCurrency(acc.balance) }})</option>
+            >{{ formatAccountOption(acc) }}</option>
           </select>
+          <p v-if="isPayBillMode" class="pay-bill-locked-note">Paying to: {{ accounts.find(a => a.id == form.to_account_id)?.name }}</p>
         </div>
 
         <!-- Category (income / expense only) -->
@@ -112,29 +128,48 @@ import { ref, reactive, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
-  transaction: { type: Object, default: null },
-  defaultAccountId: { type: [Number, String], default: '' }
+  transaction:     { type: Object, default: null },
+  defaultAccountId:{ type: [Number, String], default: '' },
+  // Pay Bill mode: pre-fill a transfer TO a specific credit card
+  payBillTargetId: { type: [Number, String], default: null },
+  payBillAmount:   { type: Number, default: 0 },
 })
 const emit  = defineEmits(['close', 'saved'])
 const toast = inject('toast')
 
-const isEdit     = computed(() => !!props.transaction)
-const loading    = ref(false)
-const error      = ref('')
-const accounts   = ref([])
-const categories = ref([])
+const isPayBillMode = computed(() => !!props.payBillTargetId)
+const isEdit        = computed(() => !!props.transaction)
+const loading       = ref(false)
+const error         = ref('')
+const accounts      = ref([])
+const categories    = ref([])
 
 const form = reactive({
-  type:          props.transaction?.type           ?? 'expense',
-  account_id:    props.transaction?.account_id     ?? props.defaultAccountId ?? '',
-  to_account_id: props.transaction?.to_account_id  ?? '',
+  type:          isPayBillMode.value ? 'transfer'
+               : (props.transaction?.type ?? 'expense'),
+  account_id:    props.transaction?.account_id ?? props.defaultAccountId ?? '',
+  to_account_id: isPayBillMode.value ? props.payBillTargetId
+               : (props.transaction?.to_account_id ?? ''),
   category_id:   props.transaction?.category_id    ?? '',
-  amount:        props.transaction?.amount         ?? '',
-  description:   props.transaction?.description    ?? '',
+  amount:        isPayBillMode.value ? props.payBillAmount
+               : (props.transaction?.amount ?? ''),
+  description:   isPayBillMode.value ? 'Credit card payment'
+               : (props.transaction?.description ?? ''),
   date:          props.transaction?.date
     ? props.transaction.date.substring(0, 10)
     : new Date().toISOString().substring(0, 10),
 })
+
+// Non-CC accounts only (credit cards cannot be a transfer source)
+const sourceAccounts = computed(() =>
+  accounts.value.filter(a => a.type !== 'credit_card')
+)
+
+// In Pay Bill mode, only show non-CC accounts as source
+// Destination is locked to the CC
+const destinationAccounts = computed(() =>
+  accounts.value.filter(a => a.id !== form.account_id)
+)
 
 const filteredCategories = computed(() =>
   categories.value.filter(c => c.type === form.type)
@@ -155,6 +190,15 @@ const submitClass = computed(() => {
 
 function formatCurrency(v) {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0 }).format(v || 0)
+}
+
+function formatAccountOption(acc) {
+  if (!acc) return ''
+  if (acc.type === 'credit_card') {
+    const owed = Math.max(parseFloat(acc.balance) || 0, 0)
+    return `${acc.name} (${formatCurrency(owed)} Owed)`
+  }
+  return `${acc.name} (${formatCurrency(acc.balance)})`
 }
 
 async function fetchFormData() {
@@ -341,4 +385,32 @@ onMounted(fetchFormData)
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
+
+/* ── Pay Bill Mode ────────────────────────────────────────── */
+.pay-bill-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  background-color: var(--primary-light);
+  border: 1px solid var(--primary-glass);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pay-bill-locked-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.type-btn--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 </style>

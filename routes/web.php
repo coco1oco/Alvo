@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,4 +35,8 @@ Route::prefix('api')->middleware('clerk')->group(function () {
 
     // Budgets
     Route::apiResource('budgets', BudgetController::class)->only(['index', 'store', 'destroy']);
+
+    // Recurring Transactions
+    Route::post('/recurring-transactions/{recurringTransaction}/process', [RecurringTransactionController::class, 'process']);
+    Route::apiResource('recurring-transactions', RecurringTransactionController::class);
 });

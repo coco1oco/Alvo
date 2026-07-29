@@ -6,6 +6,12 @@
         <h1 class="dashboard-title">Dashboard</h1>
         <p class="dashboard-subtitle">{{ currentMonth }} overview</p>
       </div>
+      <button @click="showTransactionModal = true" class="btn-primary flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Transaction
+      </button>
     </div>
 
     <!-- Skeleton Loading -->
@@ -72,7 +78,7 @@
             <span class="badge badge-success">+8.3%</span>
           </div>
           <p class="stat-value tabular-nums" :class="data.total_balance >= 0 ? 'amount-positive' : 'amount-negative'">
-            {{ formatCurrency(data.total_balance) }}
+            {{ formatCurrency(displayNetWorth) }}
           </p>
           <div class="hero-sparkline">
             <!-- Simple CSS sparkline representation or placeholder -->
@@ -94,7 +100,7 @@
               </svg>
             </div>
           </div>
-          <p class="stat-value amount-positive tabular-nums">{{ formatCurrency(data.monthly_income) }}</p>
+          <p class="stat-value amount-positive tabular-nums">{{ formatCurrency(displayIncome) }}</p>
           <p class="stat-note">This month</p>
         </div>
 
@@ -109,7 +115,7 @@
               </svg>
             </div>
           </div>
-          <p class="stat-value amount-negative tabular-nums">{{ formatCurrency(data.monthly_expense) }}</p>
+          <p class="stat-value amount-negative tabular-nums">{{ formatCurrency(displayExpenses) }}</p>
           <p class="stat-note">This month</p>
         </div>
 
@@ -125,7 +131,7 @@
             </div>
           </div>
           <p class="stat-value tabular-nums" :class="data.net >= 0 ? 'amount-positive' : 'amount-negative'">
-            {{ formatCurrency(data.net) }}
+            {{ formatCurrency(displayNet) }}
           </p>
           <p class="stat-note">Income − Expenses</p>
         </div>
@@ -264,20 +270,63 @@
             </div>
           </div>
         </div>
+        <!-- Upcoming Bills Panel -->
+        <div v-if="data.upcoming_bills?.length" class="glass-card card-panel col-span-full">
+          <div class="card-panel-header">
+            <div>
+              <h2 class="card-panel-title flex items-center gap-2">
+                <svg class="w-4 h-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Upcoming Bills (Next 7 Days)
+              </h2>
+            </div>
+            <button @click="emit('navigate', 'recurring')" class="btn-ghost text-xs">Manage Schedules →</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div v-for="bill in data.upcoming_bills" :key="bill.id" class="flex items-center justify-between p-3 rounded-xl bg-bg-surface-2/60 border border-border/50">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0"
+                     :style="{ backgroundColor: (bill.category?.color || '#6366f1') + '25', color: bill.category?.color || '#6366f1' }">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-bold text-primary-color text-xs">{{ bill.description || bill.category?.name || 'Upcoming Bill' }}</h4>
+                  <p class="text-[11px] text-muted">Due {{ formatDate(bill.next_due_date) }} · {{ bill.account?.name }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-xs amount-negative tabular-nums">−{{ formatCurrency(bill.amount) }}</span>
+                <button @click="processRecurringBill(bill)" class="btn-primary text-xs py-1 px-2.5">Log Now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
+
+    <!-- Quick Add Transaction Modal -->
+    <TransactionModal
+      v-if="showTransactionModal"
+      @close="showTransactionModal = false"
+      @saved="onTransactionSaved"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch, inject } from 'vue'
+import { ref, onMounted, nextTick, watch, inject, readonly } from 'vue'
 import axios from 'axios'
 import { Chart, registerables } from 'chart.js'
+import TransactionModal from './TransactionModal.vue'
 
 Chart.register(...registerables)
 
-const emit = defineEmits(['navigate'])
+const emit = defineEmits(['navigate', 'refresh'])
 const toast = inject('toast')
 
 const props = defineProps({
@@ -289,12 +338,52 @@ const props = defineProps({
 
 const loading       = ref(true)
 const data          = ref({})
+const showTransactionModal = ref(false)
 const cashflowChart = ref(null)
 const donutChart    = ref(null)
 const currentMonth  = new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
 
 let cashflowInstance = null
 let donutInstance    = null
+
+// ── Count-up animated display values ─────────────────────────
+const displayNetWorth = ref(0)
+const displayIncome   = ref(0)
+const displayExpenses = ref(0)
+const displayNet      = ref(0)
+
+function easeOutQuart(t) {
+  return 1 - Math.pow(1 - t, 4)
+}
+
+function animateTo(refVal, target, duration = 900) {
+  const start     = performance.now()
+  const from      = refVal.value
+  const delta     = target - from
+  function step(now) {
+    const elapsed  = now - start
+    const progress = Math.min(elapsed / duration, 1)
+    refVal.value   = from + delta * easeOutQuart(progress)
+    if (progress < 1) requestAnimationFrame(step)
+    else refVal.value = target
+  }
+  requestAnimationFrame(step)
+}
+
+// Duration scales with magnitude: ₱100 → ~300ms, ₱10K → ~600ms, ₱1M → ~900ms
+function durationFor(target) {
+  const abs = Math.abs(target || 0)
+  if (abs < 10) return 250
+  const log = Math.log10(abs) // 2=100, 3=1K, 4=10K, 5=100K, 6=1M
+  return Math.round(Math.min(900, Math.max(250, log * 150)))
+}
+
+function triggerCountUp(d) {
+  animateTo(displayNetWorth, d.total_balance  || 0, durationFor(d.total_balance))
+  animateTo(displayIncome,   d.monthly_income  || 0, durationFor(d.monthly_income))
+  animateTo(displayExpenses, d.monthly_expense || 0, durationFor(d.monthly_expense))
+  animateTo(displayNet,      d.net             || 0, durationFor(d.net))
+}
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('en-PH', {
@@ -314,6 +403,8 @@ async function fetchDashboard() {
   try {
     const { data: d } = await axios.get('/api/dashboard')
     data.value = d
+    await nextTick()
+    triggerCountUp(d)
   } catch (e) {
     console.error(e)
   } finally {
@@ -470,6 +561,28 @@ watch(() => props.isDark, async () => {
   }
 })
 
+function formatDate(d) {
+  if (!d) return '—'
+  return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
+}
+
+async function processRecurringBill(bill) {
+  try {
+    await axios.post(`/api/recurring-transactions/${bill.id}/process`)
+    toast('Bill logged successfully')
+    fetchDashboard()
+    emit('refresh')
+  } catch (e) {
+    toast(e.response?.data?.message || 'Failed to log bill', 'error')
+  }
+}
+
+function onTransactionSaved() {
+  showTransactionModal.value = false
+  fetchDashboard()
+  emit('refresh')
+}
+
 onMounted(fetchDashboard)
 </script>
 
@@ -482,6 +595,9 @@ onMounted(fetchDashboard)
 }
 
 .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 2rem;
 }
 

@@ -27,9 +27,16 @@ class TransactionController extends AbstractController
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc');
 
-        // Filter by type
-        if ($request->filled('type') && in_array($request->type, ['income', 'expense', 'transfer'])) {
-            $query->where('type', $request->type);
+        // Filter by type (income, expense, transfer, or credit_card)
+        if ($request->filled('type')) {
+            if ($request->type === 'credit_card') {
+                $query->where(function ($q) {
+                    $q->whereHas('account', fn($a) => $a->where('type', 'credit_card'))
+                      ->orWhereHas('toAccount', fn($a) => $a->where('type', 'credit_card'));
+                });
+            } elseif (in_array($request->type, ['income', 'expense', 'transfer'])) {
+                $query->where('type', $request->type);
+            }
         }
 
         // Filter by account

@@ -21,9 +21,13 @@ class DashboardController extends AbstractController
         $year     = now()->year;
         $monthNum = now()->month;
 
-        // Total balances
-        $totalBalance = $user->accounts()->sum('balance');
-        $accounts     = $user->accounts()->orderBy('name')->get();
+        // Net Worth = total non-CC balances (assets) minus total CC outstanding balances (liabilities).
+        // CC balances are stored as positive outstanding debt, so they are subtracted.
+        $totalAssets      = (float) $user->accounts()->whereNotIn('type', ['credit_card'])->sum('balance');
+        $totalLiabilities = (float) $user->accounts()->where('type', 'credit_card')->sum('balance');
+        $totalBalance     = $totalAssets - $totalLiabilities;
+        $accounts         = $user->accounts()->orderBy('name')->get();
+
 
         // This month income & expense
         $monthlyIncome = $user->transactions()
@@ -113,6 +117,15 @@ class DashboardController extends AbstractController
             ->limit(8)
             ->get();
 
+        // Upcoming recurring bills / transactions (due within next 7 days or overdue)
+        $upcomingBills = $user->recurringTransactions()
+            ->with(['account', 'toAccount', 'category'])
+            ->where('is_active', true)
+            ->whereDate('next_due_date', '<=', now()->addDays(7))
+            ->orderBy('next_due_date', 'asc')
+            ->limit(5)
+            ->get();
+
         return response()->json([
             'total_balance'       => (float) $totalBalance,
             'monthly_income'      => (float) $monthlyIncome,
@@ -123,6 +136,7 @@ class DashboardController extends AbstractController
             'expense_by_category' => $expenseByCategory,
             'budgets'             => $budgets,
             'recent_transactions' => $recentTransactions,
+            'upcoming_bills'      => $upcomingBills,
         ]);
     }
 }

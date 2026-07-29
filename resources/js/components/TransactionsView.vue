@@ -56,16 +56,24 @@
         <option value="income">Income</option>
         <option value="expense">Expense</option>
         <option value="transfer">Transfer</option>
+        <option value="credit_card">Credit Cards Only</option>
       </select>
 
       <!-- Account Filter -->
       <select v-model="filters.account_id" @change="fetchTransactions" class="input-field filter-select">
         <option value="">All Accounts</option>
-        <option v-for="acc in accounts" :key="acc.id" :value="acc.id">
-          {{ acc.name }}
-        </option>
+        <optgroup label="Bank & Cash Accounts">
+          <option v-for="acc in accounts.filter(a => a.type !== 'credit_card')" :key="acc.id" :value="acc.id">
+            {{ acc.name }}
+          </option>
+        </optgroup>
+        <optgroup label="Credit Cards">
+          <option v-for="acc in accounts.filter(a => a.type === 'credit_card')" :key="acc.id" :value="acc.id">
+            {{ acc.name }}
+          </option>
+        </optgroup>
       </select>
-
+      
       <!-- Date Filters -->
       <div class="flex items-center gap-2">
         <input v-model="filters.from" @change="fetchTransactions" type="date" class="input-field filter-date" title="From Date" />
@@ -123,11 +131,19 @@
           >
             <td class="td td--muted">{{ formatDate(txn.date) }}</td>
             <td class="td">
-              <span :class="txnBadgeClass(txn.type)">{{ txn.type }}</span>
+              <span :class="txnBadgeClass(txn)">{{ getTxnLabel(txn) }}</span>
             </td>
             <td class="td td--secondary">
-              {{ txn.account?.name }}
-              <span v-if="txn.to_account" class="td-arrow"> → {{ txn.to_account?.name }}</span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span>{{ txn.account?.name }}</span>
+                <span v-if="txn.to_account" class="td-arrow"> → {{ txn.to_account?.name }}</span>
+                <span v-if="isCreditCardTxn(txn)" class="cc-tag" title="Credit Card Transaction">
+                  <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  {{ isPayBillTxn(txn) ? 'Bill Payment' : 'Card' }}
+                </span>
+              </div>
             </td>
             <td class="td td--secondary">{{ txn.category?.name || '—' }}</td>
             <td class="td td--muted td--truncate">{{ txn.description || '—' }}</td>
@@ -231,10 +247,24 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function txnBadgeClass(type) {
-  if (type === 'income')   return 'badge badge-success'
-  if (type === 'expense')  return 'badge badge-danger'
+function isCreditCardTxn(txn) {
+  return txn.account?.type === 'credit_card' || txn.to_account?.type === 'credit_card'
+}
+
+function isPayBillTxn(txn) {
+  return txn.type === 'transfer' && txn.to_account?.type === 'credit_card'
+}
+
+function txnBadgeClass(txn) {
+  if (isPayBillTxn(txn)) return 'badge badge-primary'
+  if (txn.type === 'income')   return 'badge badge-success'
+  if (txn.type === 'expense')  return 'badge badge-danger'
   return 'badge badge-primary'
+}
+
+function getTxnLabel(txn) {
+  if (isPayBillTxn(txn)) return 'Pay Bill'
+  return txn.type
 }
 
 async function fetchAccounts() {
@@ -534,5 +564,17 @@ onMounted(() => {
 .pagination-btn {
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
+}
+
+.cc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--primary);
+  background-color: var(--primary-light);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
 }
 </style>

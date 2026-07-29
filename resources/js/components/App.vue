@@ -141,6 +141,8 @@
             <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" @navigate="currentView = $event" />
             <TransactionsView v-else-if="currentView === 'transactions'" :key="'transactions-' + refreshKey" @refresh="refresh" />
             <AccountsView    v-else-if="currentView === 'accounts'"    :key="'accounts-'    + refreshKey" @refresh="refresh" />
+            <CreditCardsView  v-else-if="currentView === 'credit-cards'" :key="'credit-cards-' + refreshKey" @refresh="refresh" />
+            <RecurringTransactionsView v-else-if="currentView === 'recurring'" :key="'recurring-' + refreshKey" @refresh="refresh" />
             <CategoriesView  v-else-if="currentView === 'categories'"  :key="'categories-'  + refreshKey" />
             <BudgetsView     v-else-if="currentView === 'budgets'"     :key="'budgets-'     + refreshKey" />
             <SettingsView    v-else-if="currentView === 'settings'"    :key="'settings-'    + refreshKey" :is-dark="isDark" @toggle-theme="toggleTheme" />
@@ -181,6 +183,8 @@ import AuthView from './AuthView.vue'
 import DashboardView from './DashboardView.vue'
 import TransactionsView from './TransactionsView.vue'
 import AccountsView from './AccountsView.vue'
+import CreditCardsView from './CreditCardsView.vue'
+import RecurringTransactionsView from './RecurringTransactionsView.vue'
 import CategoriesView from './CategoriesView.vue'
 import BudgetsView from './BudgetsView.vue'
 
@@ -205,6 +209,20 @@ const IconAccounts = defineComponent({
   render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
     h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
       d: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' })
+  ])
+})
+
+const IconCreditCard = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
+      d: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' })
+  ])
+})
+
+const IconRecurring = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
+      d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' })
   ])
 })
 
@@ -285,6 +303,8 @@ const navItems = [
   { view: 'dashboard',    label: 'Dashboard',    icon: IconDashboard },
   { view: 'transactions', label: 'Transactions', icon: IconTransactions },
   { view: 'accounts',     label: 'Accounts',     icon: IconAccounts },
+  { view: 'credit-cards', label: 'Credit Cards', icon: IconCreditCard },
+  { view: 'recurring',    label: 'Recurring',    icon: IconRecurring },
   { view: 'categories',   label: 'Categories',   icon: IconCategories },
   { view: 'budgets',      label: 'Budgets',      icon: IconBudgets },
   { view: 'settings',     label: 'Settings',     icon: IconSettings },

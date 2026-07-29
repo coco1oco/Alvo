@@ -31,10 +31,13 @@ class StoreAccountRequest extends FormRequest
                     return $query->where('user_id', $this->user()->id);
                 })
             ],
-            'type'    => 'required|in:cash,bank,credit_card,savings,other',
-            'balance' => 'nullable|numeric',
-            'color'   => 'nullable|string|max:7',
-            'icon'    => 'nullable|string|max:50',
+            'type'              => 'required|in:cash,bank,credit_card,savings,other',
+            'balance'           => 'nullable|numeric',
+            'credit_limit'      => 'nullable|numeric|min:1',
+            'billing_cycle_day' => 'nullable|integer|min:1|max:28',
+            'due_date_day'      => 'nullable|integer|min:1|max:28',
+            'color'             => 'nullable|string|max:7',
+            'icon'              => 'nullable|string|max:50',
         ];
     }
 }

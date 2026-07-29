@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Account extends Model
 {
-    /** @var string[] */
     protected $fillable = [
         'user_id',
         'name',
         'type',
         'balance',
+        'credit_limit',
+        'billing_cycle_day',
+        'due_date_day',
         'color',
         'icon',
         'is_archived',
@@ -21,8 +23,11 @@ class Account extends Model
 
     /** @var array<string, string> */
     protected $casts = [
-        'balance' => 'decimal:2',
-        'is_archived' => 'boolean',
+        'balance'           => 'decimal:2',
+        'credit_limit'      => 'decimal:2',
+        'billing_cycle_day' => 'integer',
+        'due_date_day'      => 'integer',
+        'is_archived'       => 'boolean',
     ];
 
     /**
