@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Prunable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transaction extends Model
 {
-    use SoftDeletes, Prunable;
+    use SoftDeletes, Prunable, HasFactory;
 
     /** @var string[] */
     protected $fillable = [
@@ -20,13 +21,23 @@ class Transaction extends Model
         'type',
         'amount',
         'description',
+        'notes',
+        'is_reimbursable',
+        'attachment_path',
+        'tags',
         'date',
+        'is_split',
+        'split_data',
     ];
 
     /** @var array<string, string> */
     protected $casts = [
-        'amount' => 'decimal:2',
-        'date'   => 'date',
+        'amount'          => 'decimal:2',
+        'date'            => 'date',
+        'is_split'        => 'boolean',
+        'split_data'      => 'array',
+        'is_reimbursable' => 'boolean',
+        'tags'            => 'array',
     ];
 
     /**

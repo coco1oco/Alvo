@@ -30,11 +30,14 @@ Route::prefix('api')->middleware('clerk')->group(function () {
     // Categories
     Route::apiResource('categories', CategoryController::class);
 
-    // Transactions
+    // Transactions & Splits
     Route::get('/transactions/export', [TransactionController::class, 'export']);
     Route::get('/transactions/trashed', [TransactionController::class, 'trashed']);
     Route::post('/transactions/{id}/restore', [TransactionController::class, 'restore']);
     Route::delete('/transactions/{id}/force', [TransactionController::class, 'forceDelete']);
+    Route::get('/splits/summary', [TransactionController::class, 'splitsSummary']);
+    Route::patch('/transactions/{transaction}/split-participant/{index}/toggle-settle', [TransactionController::class, 'toggleSplitSettlement']);
+    Route::get('/transactions/{transaction}/attachment', [TransactionController::class, 'showAttachment']);
     Route::apiResource('transactions', TransactionController::class);
 
     // Budgets

@@ -140,6 +140,7 @@
           <Transition name="page" mode="out-in">
             <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" @navigate="currentView = $event" />
             <TransactionsView v-else-if="currentView === 'transactions'" :key="'transactions-' + refreshKey" @refresh="refresh" />
+            <SplitsView       v-else-if="currentView === 'splits'"       :key="'splits-'       + refreshKey" @refresh="refresh" />
             <AccountsView    v-else-if="currentView === 'accounts'"    :key="'accounts-'    + refreshKey" @refresh="refresh" />
             <CreditCardsView  v-else-if="currentView === 'credit-cards'" :key="'credit-cards-' + refreshKey" @refresh="refresh" />
             <GoalsView        v-else-if="currentView === 'goals'"        :key="'goals-'        + refreshKey" @refresh="refresh" />
@@ -193,6 +194,7 @@ import SubscriptionsView from './SubscriptionsView.vue'
 import ReportsView from './ReportsView.vue'
 import NetWorthView from './NetWorthView.vue'
 import RecurringTransactionsView from './RecurringTransactionsView.vue'
+import SplitsView from './SplitsView.vue'
 import CategoriesView from './CategoriesView.vue'
 import BudgetsView from './BudgetsView.vue'
 
@@ -275,6 +277,13 @@ const IconBudgets = defineComponent({
   ])
 })
 
+const IconSplits = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
+      d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
+  ])
+})
+
 const IconSettings = defineComponent({
   render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
     h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2',
@@ -337,6 +346,7 @@ function toggleTheme() {
 const navItems = [
   { view: 'dashboard',     label: 'Dashboard',     icon: IconDashboard },
   { view: 'transactions',  label: 'Transactions',  icon: IconTransactions },
+  { view: 'splits',        label: 'Splits & Debts', icon: IconSplits },
   { view: 'accounts',      label: 'Accounts',      icon: IconAccounts },
   { view: 'credit-cards',  label: 'Credit Cards',  icon: IconCreditCard },
   { view: 'goals',         label: 'Goals',         icon: IconGoals },
