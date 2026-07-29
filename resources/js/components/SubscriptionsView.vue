@@ -3,14 +3,14 @@
     <!-- Header -->
     <div class="view-header">
       <div>
-        <h1 class="view-title">Subscription Manager</h1>
-        <p class="view-subtitle">Track recurring SaaS, streaming services, and membership renewals</p>
+        <h1 class="view-title">Bills &amp; Subscriptions Manager</h1>
+        <p class="view-subtitle">Track recurring bills, loans, SaaS, streaming services, and membership renewals</p>
       </div>
       <button @click="openModal()" class="btn-primary">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
         </svg>
-        Add Subscription
+        Add Bill / Subscription
       </button>
     </div>
 
@@ -27,18 +27,18 @@
       <div class="glass-card summary-hero-card mb-6">
         <div class="summary-hero-content">
           <div>
-            <span class="summary-label">Monthly Subscription Spend</span>
+            <span class="summary-label">Monthly Recurring Outflow</span>
             <h2 class="summary-value tabular-nums amount-negative">{{ formatCurrency(totalMonthlySpend) }}</h2>
             <p class="summary-subtext">Yearly projection: {{ formatCurrency(totalMonthlySpend * 12) }}</p>
           </div>
 
           <div class="summary-breakdown">
             <div class="summary-box">
-              <span class="box-label">Active Subscriptions</span>
+              <span class="box-label">Active Items</span>
               <span class="box-value tabular-nums text-primary-color">{{ activeSubs.length }}</span>
             </div>
             <div class="summary-box">
-              <span class="box-label">Renewing Soon (7 days)</span>
+              <span class="box-label">Due Soon (7 days)</span>
               <span class="box-value tabular-nums" :class="renewingSoon.length ? 'text-warning font-bold' : 'text-primary-color'">
                 {{ renewingSoon.length }}
               </span>
@@ -49,7 +49,7 @@
 
       <!-- Quick Preset Selector Bar -->
       <div class="glass-card p-4 mb-6">
-        <span class="text-xs font-bold uppercase tracking-wider text-muted block mb-2.5">Quick Add Popular Services</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-muted block mb-2.5">Quick Add Popular Bills &amp; Services</span>
         <div class="flex flex-wrap gap-2">
           <button
             v-for="preset in presets"
@@ -71,8 +71,8 @@
           <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          <p class="empty-text">No active subscriptions tracked yet.</p>
-          <button @click="openModal()" class="btn-primary mt-3">Add Your First Subscription</button>
+          <p class="empty-text">No bills or subscriptions tracked yet.</p>
+          <button @click="openModal()" class="btn-primary mt-3">Add Your First Item</button>
         </div>
 
         <div v-else class="subs-grid">
@@ -98,7 +98,7 @@
                   </div>
                   <div>
                     <h3 class="font-bold text-sm text-primary-color">{{ sub.name }}</h3>
-                    <p class="text-xs text-muted">{{ sub.account?.name || 'Manual Payment' }}</p>
+                    <p class="text-xs text-muted">{{ sub.account?.name || 'Default Account' }}</p>
                   </div>
                 </div>
 
@@ -118,16 +118,32 @@
                   <span class="text-2xl font-extrabold tabular-nums amount-negative">
                     {{ formatCurrency(sub.amount) }}
                   </span>
-                  <span class="text-xs text-muted">/{{ sub.billing_cycle === 'yearly' ? 'yr' : 'mo' }}</span>
+                  <span class="text-xs text-muted">/{{ sub.billing_cycle === 'yearly' ? 'yr' : sub.billing_cycle === 'weekly' ? 'wk' : 'mo' }}</span>
                 </div>
                 <span class="badge badge-primary uppercase text-[10px]">{{ sub.billing_cycle }}</span>
               </div>
             </div>
 
-            <!-- Renewal Alert Footer -->
-            <div class="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
-              <span class="text-xs text-muted">Renews: {{ formatDate(sub.next_renewal_date) }}</span>
-              <span :class="getRenewalBadgeClass(sub)">{{ getRenewalText(sub) }}</span>
+            <!-- Renewal Alert & 1-Click Log Payment Button -->
+            <div class="mt-4 pt-3 border-t border-border/40 flex items-center justify-between gap-2">
+              <div>
+                <span class="text-[11px] text-muted block">Due: {{ formatDate(sub.next_renewal_date) }}</span>
+                <span :class="getRenewalBadgeClass(sub)">{{ getRenewalText(sub) }}</span>
+              </div>
+              <button
+                @click="processNow(sub)"
+                :disabled="processingId === sub.id"
+                class="btn-primary py-1 px-2.5 text-xs flex items-center gap-1 shadow-sm"
+                title="Log payment to transactions and advance renewal date"
+              >
+                <span v-if="processingId === sub.id">Processing...</span>
+                <template v-else>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Log Payment</span>
+                </template>
+              </button>
             </div>
           </div>
         </div>
@@ -216,16 +232,18 @@ const showModal = ref(false)
 const editingSub = ref(null)
 const saving = ref(false)
 const formError = ref('')
+const processingId = ref(null)
 
 const presets = [
+  { name: 'House Rent', amount: 15000, cycle: 'monthly', color: '#6366f1' },
+  { name: 'Car Loan', amount: 12500, cycle: 'monthly', color: '#f59e0b' },
+  { name: 'Electricity Bill', amount: 3500, cycle: 'monthly', color: '#eab308' },
+  { name: 'Internet Bill', amount: 1699, cycle: 'monthly', color: '#06b6d4' },
+  { name: 'Water Bill', amount: 650, cycle: 'monthly', color: '#3b82f6' },
+  { name: 'Insurance Premium', amount: 4500, cycle: 'monthly', color: '#10b981' },
   { name: 'Netflix', amount: 549, cycle: 'monthly', color: '#E50914' },
   { name: 'Spotify', amount: 149, cycle: 'monthly', color: '#1DB954' },
   { name: 'ChatGPT Plus', amount: 1150, cycle: 'monthly', color: '#10A37F' },
-  { name: 'YouTube Premium', amount: 159, cycle: 'monthly', color: '#FF0000' },
-  { name: 'GitHub Copilot', amount: 580, cycle: 'monthly', color: '#6e40c9' },
-  { name: 'iCloud 200GB', amount: 149, cycle: 'monthly', color: '#007AFF' },
-  { name: 'Adobe Creative Cloud', amount: 2800, cycle: 'monthly', color: '#FF0000' },
-  { name: 'Disney+', amount: 369, cycle: 'monthly', color: '#113CCF' },
 ]
 
 const form = reactive({
@@ -354,6 +372,20 @@ async function saveSub() {
       : (e.response?.data?.message || 'Failed to save subscription')
   } finally {
     saving.value = false
+  }
+}
+
+async function processNow(sub) {
+  processingId.value = sub.id
+  try {
+    await axios.post(`/api/subscriptions/${sub.id}/process`)
+    toast('Payment logged & balance updated!')
+    fetchSubs()
+    emit('refresh')
+  } catch (e) {
+    toast(e.response?.data?.message || 'Failed to log payment', 'error')
+  } finally {
+    processingId.value = null
   }
 }
 

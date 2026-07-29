@@ -406,7 +406,7 @@ const form = reactive({
     type: isPayBillMode.value
         ? "transfer"
         : (props.transaction?.type ?? "expense"),
-    account_id: props.transaction?.account_id ?? props.defaultAccountId ?? "",
+    account_id: props.transaction?.account_id || props.defaultAccountId || (localStorage.getItem('alvo_pref_default_account') ? Number(localStorage.getItem('alvo_pref_default_account')) : ""),
     to_account_id: isPayBillMode.value
         ? props.payBillTargetId
         : (props.transaction?.to_account_id ?? ""),

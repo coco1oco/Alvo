@@ -457,6 +457,14 @@ onMounted(fetchData)
 .box-label { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
 .box-value { font-size: 1.125rem; font-weight: 700; margin-top: 0.25rem; }
 
+/* ── Filter Pills & Presets ───────────────────────────────── */
+.period-pill { padding: 0.4rem 0.875rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 600; background: var(--bg-surface-2); color: var(--text-muted); border: 1px solid transparent; cursor: pointer; transition: all 0.15s; }
+.period-pill:hover { color: var(--text-primary); }
+.period-pill--active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+
+.preset-btn { padding: 0.4rem 0.75rem; border-radius: 0.625rem; border: 1px solid; cursor: pointer; transition: transform 0.15s ease; }
+.preset-btn:hover { transform: translateY(-1px); }
+
 /* ── Action Buttons ───────────────────────────────────────── */
 .action-btn {
   width: 28px;

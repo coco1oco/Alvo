@@ -28,6 +28,9 @@ class StoreRecurringTransactionRequest extends FormRequest
             'next_due_date' => 'nullable|date',
             'is_active' => 'nullable|boolean',
             'auto_process' => 'nullable|boolean',
+            'is_subscription' => 'nullable|boolean',
+            'logo_url' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:30',
         ];
     }
 }

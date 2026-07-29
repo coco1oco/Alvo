@@ -59,14 +59,6 @@
             </option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label class="label">First Day of Week</label>
-          <select v-model="preferences.weekStart" @change="savePreferences" class="input-field">
-            <option value="sunday">Sunday</option>
-            <option value="monday">Monday</option>
-          </select>
-        </div>
       </section>
 
       <!-- ── Appearance / Theme Selector ──────────────────────── -->
@@ -191,8 +183,7 @@ const currentTheme = computed(() => props.isDark ? 'dark' : 'light')
 
 const preferences = reactive({
   currency: currentCurrency.value || 'PHP',
-  defaultAccountId: localStorage.getItem('alvo_pref_default_account') || '',
-  weekStart: localStorage.getItem('alvo_pref_week_start') || 'sunday'
+  defaultAccountId: localStorage.getItem('alvo_pref_default_account') || ''
 })
 
 async function fetchAccounts() {
@@ -207,8 +198,7 @@ async function fetchAccounts() {
 function savePreferences() {
   setGlobalCurrency(preferences.currency)
   localStorage.setItem('alvo_pref_default_account', preferences.defaultAccountId)
-  localStorage.setItem('alvo_pref_week_start', preferences.weekStart)
-  toast(`Currency updated to ${preferences.currency}`)
+  toast(`Preferences saved`)
 }
 
 function setTheme(mode) {

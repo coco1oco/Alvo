@@ -63,30 +63,43 @@
 
 
     <template v-else>
-      <!-- Total Net Worth Summary Banner -->
+      <!-- Total Liquid Balance Summary Banner -->
       <div class="glass-card summary-hero-card mb-6">
         <div class="summary-hero-content">
           <div>
-            <span class="summary-label">Total Net Worth</span>
-            <h2 class="summary-value tabular-nums">{{ formatCurrency(totalBalance) }}</h2>
+            <span class="summary-label">Total Liquid Balance</span>
+            <h2 class="summary-value tabular-nums">{{ formatCurrency(totalAssets) }}</h2>
             <p class="summary-subtext">Across {{ activeAccounts.length }} active account{{ activeAccounts.length === 1 ? '' : 's' }}</p>
           </div>
           <div class="summary-breakdown">
             <div class="summary-box">
-              <span class="box-label">Assets</span>
-              <span class="box-value amount-positive tabular-nums">{{ formatCurrency(totalAssets) }}</span>
+              <span class="box-label">Bank & Savings</span>
+              <span class="box-value amount-positive tabular-nums">{{ formatCurrency(totalBankBalance) }}</span>
             </div>
             <div class="summary-box">
-              <span class="box-label">Liabilities</span>
-              <span class="box-value amount-negative tabular-nums">{{ formatCurrency(totalLiabilities) }}</span>
+              <span class="box-label">Cash & Wallets</span>
+              <span class="box-value amount-positive tabular-nums">{{ formatCurrency(totalCashBalance) }}</span>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Account Category Filter Pills -->
+      <div class="flex items-center gap-2 mb-6 flex-wrap">
+        <button
+          v-for="filter in accountFilterOptions"
+          :key="filter.value"
+          @click="selectedAccountFilter = filter.value"
+          class="account-filter-pill"
+          :class="{ 'account-filter-pill--active': selectedAccountFilter === filter.value }"
+        >
+          {{ filter.label }}
+        </button>
+      </div>
+
       <div class="account-groups-container">
         <!-- Grouped Accounts -->
-        <div v-for="(groupAccounts, groupName) in groupedAccounts" :key="groupName" class="account-group" v-show="groupAccounts.length">
+        <div v-for="(groupAccounts, groupName) in filteredGroupedAccounts" :key="groupName" class="account-group" v-show="groupAccounts.length">
           <h2 class="group-title">{{ groupName }}</h2>
           <div class="accounts-grid">
             <div
@@ -101,22 +114,24 @@
               <div class="account-glow" :style="{ backgroundColor: acc.color }"></div>
 
               <!-- Top Row: Identity + Menu -->
-              <div class="account-top flex items-center justify-between">
-                <div class="account-identity flex items-center gap-3">
-                  <div class="account-icon shadow-sm" :style="{ backgroundColor: acc.color + '30', color: acc.color }">
+              <div class="account-top flex items-center justify-between gap-2">
+                <div class="account-identity flex items-center gap-2.5 min-w-0 flex-1">
+                  <div class="account-icon shadow-sm flex-shrink-0" :style="{ backgroundColor: acc.color + '30', color: acc.color }">
                     <img v-if="acc.icon && acc.icon !== 'wallet'" :src="`/bankIcons/${acc.icon}`" class="w-6 h-6 object-contain" />
                     <component v-else :is="accountIcon(acc.type)" class="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 class="account-name font-bold text-sm text-primary-color">{{ acc.name }}</h3>
-                    <p class="account-subtag text-xs text-muted font-medium">{{ formatAccountSubtag(acc) }}</p>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="account-name font-bold text-sm text-primary-color truncate">{{ acc.name }}</h3>
+                    <p class="account-subtag text-xs text-muted font-medium truncate">{{ formatAccountSubtag(acc) }}</p>
                   </div>
                 </div>
 
                 <!-- ••• Menu Button Dropdown -->
-                <div class="relative">
+                <div class="relative flex-shrink-0">
                   <button @click.stop="toggleAccountMenu(acc.id)" class="menu-dots-btn" title="Account Options">
-                    •••
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
                   </button>
 
                   <div v-if="activeMenuId === acc.id" class="account-dropdown-menu" @click.stop>
@@ -235,23 +250,23 @@
         </div>
       </div>
 
-      <!-- Net Worth Footer -->
+      <!-- Liquid Balance Footer -->
       <div v-if="activeAccounts.length" class="glass-card net-worth-card">
         <div class="nw-breakdown">
           <div class="nw-item">
-            <p class="nw-label">Assets</p>
-            <p class="nw-value amount-positive">{{ formatCurrency(totalAssets) }}</p>
+            <p class="nw-label">Bank & Savings</p>
+            <p class="nw-value amount-positive">{{ formatCurrency(totalBankBalance) }}</p>
           </div>
-          <div class="nw-operator">-</div>
+          <div class="nw-operator">+</div>
           <div class="nw-item">
-            <p class="nw-label">Liabilities</p>
-            <p class="nw-value amount-negative">{{ formatCurrency(totalLiabilities) }}</p>
+            <p class="nw-label">Cash & Wallets</p>
+            <p class="nw-value amount-positive">{{ formatCurrency(totalCashBalance) }}</p>
           </div>
           <div class="nw-operator">=</div>
           <div class="nw-item nw-total">
-            <p class="nw-label text-primary-color">Net Worth</p>
-            <p class="nw-value" :class="totalBalance >= 0 ? 'text-primary' : 'amount-negative'">
-              {{ formatCurrency(totalBalance) }}
+            <p class="nw-label text-primary-color">Total Liquid Balance</p>
+            <p class="nw-value text-primary">
+              {{ formatCurrency(totalAssets) }}
             </p>
           </div>
         </div>
@@ -281,45 +296,16 @@
               <option value="cash">Cash / Wallet</option>
               <option value="bank">Bank Account</option>
               <option value="savings">Savings Account</option>
-              <option value="credit_card">Credit Card</option>
               <option value="other">Other</option>
             </select>
           </div>
           <div v-if="!editingAcc">
-            <label class="label">{{ form.type === 'credit_card' ? 'Current Balance Owed' : 'Starting Balance' }}</label>
+            <label class="label">Starting Balance</label>
             <div class="input-with-prefix">
               <span class="input-prefix">{{ getCurrencySymbol() }}</span>
               <input v-model="form.balance" type="number" step="0.01" min="0" placeholder="0.00" class="input-field input-field--prefix" />
             </div>
-            <p v-if="form.type === 'credit_card'" class="field-hint">Enter how much you currently owe on this card.</p>
           </div>
-
-          <!-- Credit Card specific fields -->
-          <template v-if="form.type === 'credit_card'">
-            <div>
-              <label class="label">Credit Limit <span class="label-required">*</span></label>
-              <div class="input-with-prefix">
-                <span class="input-prefix">{{ getCurrencySymbol() }}</span>
-                <input v-model="form.credit_limit" type="number" step="0.01" min="1"
-                       :required="form.type === 'credit_card'"
-                       placeholder="e.g. 50000" class="input-field input-field--prefix" />
-              </div>
-            </div>
-            <div class="form-row-2">
-              <div>
-                <label class="label">Billing Cycle Day <span class="label-optional">(optional)</span></label>
-                <input v-model="form.billing_cycle_day" type="number" min="1" max="28"
-                       placeholder="e.g. 25" class="input-field" />
-                <p class="field-hint">Day of month your statement closes.</p>
-              </div>
-              <div>
-                <label class="label">Payment Due Day <span class="label-optional">(optional)</span></label>
-                <input v-model="form.due_date_day" type="number" min="1" max="28"
-                       placeholder="e.g. 15" class="input-field" />
-                <p class="field-hint">Day of month payment is due.</p>
-              </div>
-            </div>
-          </template>
           <div>
             <div class="color-picker-header">
               <label class="label label-no-mb">Color</label>
@@ -472,25 +458,44 @@ const bankKeywords = [
 ]
 const form = reactive({ name: '', type: 'cash', balance: '', credit_limit: '', billing_cycle_day: '', due_date_day: '', color: '#6366f1', icon: 'wallet' })
 
-const activeAccounts = computed(() => accounts.value.filter(a => !a.is_archived))
-const archivedAccounts = computed(() => accounts.value.filter(a => a.is_archived))
+const activeAccounts = computed(() => accounts.value.filter(a => !a.is_archived && a.type !== 'credit_card'))
+const archivedAccounts = computed(() => accounts.value.filter(a => a.is_archived && a.type !== 'credit_card'))
+
+const selectedAccountFilter = ref('all')
+const accountFilterOptions = [
+  { label: 'All Accounts', value: 'all' },
+  { label: 'Bank & Savings', value: 'bank' },
+  { label: 'Cash & Wallets', value: 'cash' },
+]
 
 const groupedAccounts = computed(() => {
   return {
     'Bank & Savings': activeAccounts.value.filter(a => a.type === 'bank' || a.type === 'savings'),
-    'Credit Cards': activeAccounts.value.filter(a => a.type === 'credit_card'),
     'Cash & Wallets': activeAccounts.value.filter(a => a.type === 'cash' || a.type === 'other')
   }
 })
 
-const totalAssets      = computed(() => activeAccounts.value
-  .filter(a => a.type !== 'credit_card' && parseFloat(a.balance) > 0)
-  .reduce((s, a) => s + parseFloat(a.balance), 0))
-// CC balances are stored as positive outstanding debt → they are liabilities
-const totalLiabilities = computed(() => activeAccounts.value
-  .filter(a => a.type === 'credit_card')
-  .reduce((s, a) => s + Math.max(parseFloat(a.balance), 0), 0))
-const totalBalance = computed(() => totalAssets.value - totalLiabilities.value)
+const filteredGroupedAccounts = computed(() => {
+  if (selectedAccountFilter.value === 'all') return groupedAccounts.value
+  if (selectedAccountFilter.value === 'bank') {
+    return { 'Bank & Savings': groupedAccounts.value['Bank & Savings'] }
+  }
+  if (selectedAccountFilter.value === 'cash') {
+    return { 'Cash & Wallets': groupedAccounts.value['Cash & Wallets'] }
+  }
+  return groupedAccounts.value
+})
+
+const totalBankBalance = computed(() => activeAccounts.value
+  .filter(a => a.type === 'bank' || a.type === 'savings')
+  .reduce((s, a) => s + Math.max(parseFloat(a.balance) || 0, 0), 0))
+
+const totalCashBalance = computed(() => activeAccounts.value
+  .filter(a => a.type === 'cash' || a.type === 'other')
+  .reduce((s, a) => s + Math.max(parseFloat(a.balance) || 0, 0), 0))
+
+const totalAssets = computed(() => totalBankBalance.value + totalCashBalance.value)
+const totalBalance = computed(() => totalAssets.value)
 
 function getProportion(acc) {
   const bal = parseFloat(acc.balance) || 0
@@ -732,6 +737,27 @@ onUnmounted(() => {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin: 0.25rem 0 0;
+}
+
+/* ── Filter Pills ─────────────────────────────────────────── */
+.account-filter-pill {
+  padding: 0.4rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg-surface-2);
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.account-filter-pill:hover {
+  color: var(--text-primary);
+}
+.account-filter-pill--active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
 }
 
 .sk-card { pointer-events: none; }

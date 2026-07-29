@@ -50,10 +50,6 @@
               class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
               :style="currentView === item.view ? activeNavStyle : inactiveNavStyle"
             >
-              <!-- Active indicator bar -->
-              <span v-if="currentView === item.view"
-                    class="absolute left-3 w-0.5 h-4 rounded-full nav-indicator">
-              </span>
               <component :is="item.icon" class="w-[18px] h-[18px] flex-shrink-0" />
               {{ item.label }}
             </button>
@@ -138,19 +134,20 @@
         <!-- ── Main Content ───────────────────────────────────── -->
         <main class="flex-1 overflow-y-auto transition-colors duration-200 app-main">
           <Transition name="page" mode="out-in">
-            <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" @navigate="currentView = $event" />
-            <TransactionsView v-else-if="currentView === 'transactions'" :key="'transactions-' + refreshKey" @refresh="refresh" />
-            <SplitsView       v-else-if="currentView === 'splits'"       :key="'splits-'       + refreshKey" @refresh="refresh" />
-            <AccountsView    v-else-if="currentView === 'accounts'"    :key="'accounts-'    + refreshKey" @refresh="refresh" />
-            <CreditCardsView  v-else-if="currentView === 'credit-cards'" :key="'credit-cards-' + refreshKey" @refresh="refresh" />
-            <GoalsView        v-else-if="currentView === 'goals'"        :key="'goals-'        + refreshKey" @refresh="refresh" />
-            <SubscriptionsView v-else-if="currentView === 'subscriptions'" :key="'subscriptions-' + refreshKey" @refresh="refresh" />
-            <ReportsView      v-else-if="currentView === 'reports'"      :key="'reports-'      + refreshKey" :is-dark="isDark" />
-            <NetWorthView     v-else-if="currentView === 'net-worth'"    :key="'net-worth-'    + refreshKey" :is-dark="isDark" />
-            <RecurringTransactionsView v-else-if="currentView === 'recurring'" :key="'recurring-' + refreshKey" @refresh="refresh" />
-            <CategoriesView  v-else-if="currentView === 'categories'"  :key="'categories-'  + refreshKey" />
-            <BudgetsView     v-else-if="currentView === 'budgets'"     :key="'budgets-'     + refreshKey" />
-            <SettingsView    v-else-if="currentView === 'settings'"    :key="'settings-'    + refreshKey" :is-dark="isDark" @toggle-theme="toggleTheme" />
+            <KeepAlive>
+              <DashboardView   v-if="currentView === 'dashboard'"    :key="'dashboard-'   + refreshKey" :is-dark="isDark" @navigate="currentView = $event" />
+              <TransactionsView v-else-if="currentView === 'transactions'" :key="'transactions-' + refreshKey" @refresh="refresh" />
+              <SplitsView       v-else-if="currentView === 'splits'"       :key="'splits-'       + refreshKey" @refresh="refresh" />
+              <AccountsView    v-else-if="currentView === 'accounts'"    :key="'accounts-'    + refreshKey" @refresh="refresh" />
+              <CreditCardsView  v-else-if="currentView === 'credit-cards'" :key="'credit-cards-' + refreshKey" @refresh="refresh" />
+              <GoalsView        v-else-if="currentView === 'goals'"        :key="'goals-'        + refreshKey" @refresh="refresh" />
+              <SubscriptionsView v-else-if="currentView === 'subscriptions'" :key="'subscriptions-' + refreshKey" @refresh="refresh" />
+              <ReportsView      v-else-if="currentView === 'reports'"      :key="'reports-'      + refreshKey" :is-dark="isDark" />
+              <RecurringTransactionsView v-else-if="currentView === 'recurring'" :key="'recurring-' + refreshKey" @refresh="refresh" />
+              <CategoriesView  v-else-if="currentView === 'categories'"  :key="'categories-'  + refreshKey" />
+              <BudgetsView     v-else-if="currentView === 'budgets'"     :key="'budgets-'     + refreshKey" />
+              <SettingsView    v-else-if="currentView === 'settings'"    :key="'settings-'    + refreshKey" :is-dark="isDark" @toggle-theme="toggleTheme" />
+            </KeepAlive>
           </Transition>
         </main>
       </div>
@@ -192,7 +189,6 @@ import CreditCardsView from './CreditCardsView.vue'
 import GoalsView from './GoalsView.vue'
 import SubscriptionsView from './SubscriptionsView.vue'
 import ReportsView from './ReportsView.vue'
-import NetWorthView from './NetWorthView.vue'
 import RecurringTransactionsView from './RecurringTransactionsView.vue'
 import SplitsView from './SplitsView.vue'
 import CategoriesView from './CategoriesView.vue'
@@ -350,10 +346,8 @@ const navItems = [
   { view: 'accounts',      label: 'Accounts',      icon: IconAccounts },
   { view: 'credit-cards',  label: 'Credit Cards',  icon: IconCreditCard },
   { view: 'goals',         label: 'Goals',         icon: IconGoals },
-  { view: 'subscriptions', label: 'Subscriptions', icon: IconSubscriptions },
+  { view: 'subscriptions', label: 'Bills & Subscriptions', icon: IconSubscriptions },
   { view: 'reports',       label: 'Reports',       icon: IconReports },
-  { view: 'net-worth',     label: 'Net Worth',     icon: IconNetWorth },
-  { view: 'recurring',     label: 'Recurring',     icon: IconRecurring },
   { view: 'categories',    label: 'Categories',    icon: IconCategories },
   { view: 'budgets',       label: 'Budgets',       icon: IconBudgets },
   { view: 'settings',      label: 'Settings',      icon: IconSettings },

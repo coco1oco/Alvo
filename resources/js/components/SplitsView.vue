@@ -45,13 +45,19 @@
         </div>
       </div>
 
-      <!-- Tabs: People Ledger vs Transactions breakdown -->
-      <div class="view-tabs mb-6">
+      <!-- Tabs: Active People vs Completed vs Transactions breakdown -->
+      <div class="view-tabs mb-6 flex flex-wrap gap-2">
         <button
           @click="activeTab = 'people'"
           :class="['tab-btn', activeTab === 'people' ? 'tab-btn--active' : '']"
         >
-          People Ledger ({{ people.length }})
+          Active Ledgers ({{ activePeople.length }})
+        </button>
+        <button
+          @click="activeTab = 'completed'"
+          :class="['tab-btn', activeTab === 'completed' ? 'tab-btn--active' : '']"
+        >
+          Completed ({{ completedPeople.length }})
         </button>
         <button
           @click="activeTab = 'transactions'"
@@ -61,19 +67,19 @@
         </button>
       </div>
 
-      <!-- TAB 1: People Ledger Grid -->
+      <!-- TAB 1: Active People Ledger Grid -->
       <div v-if="activeTab === 'people'" class="people-section">
-        <div v-if="!people.length" class="empty-state glass-card">
+        <div v-if="!activePeople.length" class="empty-state glass-card">
           <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <p class="empty-text">No split expenses logged yet.</p>
+          <p class="empty-text">No active split debts. All ledgers are settled!</p>
           <button @click="openTransactionModal" class="btn-primary mt-3">Split Your First Expense</button>
         </div>
 
         <div v-else class="people-grid">
           <div
-            v-for="person in people"
+            v-for="person in activePeople"
             :key="person.name"
             class="glass-card person-card"
           >
@@ -113,6 +119,63 @@
                     :class="['settle-btn', item.is_settled ? 'settle-btn--paid' : '']"
                   >
                     {{ item.is_settled ? 'Paid ✓' : 'Mark Settled' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Completed People Ledger Grid -->
+      <div v-else-if="activeTab === 'completed'" class="people-section">
+        <div v-if="!completedPeople.length" class="empty-state glass-card">
+          <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="empty-text">No completed split ledgers yet.</p>
+        </div>
+
+        <div v-else class="people-grid">
+          <div
+            v-for="person in completedPeople"
+            :key="person.name"
+            class="glass-card person-card opacity-85"
+          >
+            <div class="person-card-header">
+              <div class="person-avatar bg-success/20 text-success">
+                {{ person.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="person-info">
+                <h3 class="person-name">{{ person.name }}</h3>
+                <span class="person-subtext">
+                  All {{ person.settled_count }} split expense{{ person.settled_count === 1 ? '' : 's' }} fully settled
+                </span>
+              </div>
+              <div class="person-amount-tag text-right">
+                <span class="text-xs text-muted block">Status</span>
+                <span class="badge badge-success text-xs font-bold">Settled ✓</span>
+              </div>
+            </div>
+
+            <!-- Person Splits List -->
+            <div class="person-splits-list">
+              <div
+                v-for="item in person.splits"
+                :key="item.transaction_id + '-' + item.participant_index"
+                class="person-split-item"
+              >
+                <div class="split-item-info">
+                  <span class="split-item-desc">{{ item.description }}</span>
+                  <span class="split-item-meta">{{ item.date }} • Total: {{ formatCurrency(item.total_amount) }}</span>
+                </div>
+                <div class="split-item-action">
+                  <span class="split-item-share tabular-nums line-through opacity-70">{{ formatCurrency(item.person_share) }}</span>
+                  <button
+                    @click="toggleSettle(item.transaction_id, item.participant_index)"
+                    class="settle-btn settle-btn--paid"
+                  >
+                    Paid ✓
                   </button>
                 </div>
               </div>
@@ -187,7 +250,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
 import axios from 'axios'
 import { formatCurrency } from '../utils/currency'
 import TransactionModal from './TransactionModal.vue'
@@ -202,6 +265,9 @@ const people = ref([])
 const splitTransactions = ref([])
 const showModal = ref(false)
 const editingTxn = ref(null)
+
+const activePeople = computed(() => people.value.filter(p => p.pending_count > 0 || parseFloat(p.total_owed) > 0))
+const completedPeople = computed(() => people.value.filter(p => p.pending_count === 0 && parseFloat(p.total_owed) <= 0))
 
 function formatDate(d) {
   return new Date(d).toLocaleDateString('en-PH', {

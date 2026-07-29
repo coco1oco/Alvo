@@ -36,6 +36,7 @@ return [
     ],
 
     'clerk' => [
+        'publishable_key' => env('CLERK_PUBLISHABLE_KEY'),
         'secret_key' => env('CLERK_SECRET_KEY'),
         'jwks_url' => env('CLERK_JWKS_URL', 'https://api.clerk.com/v1/jwks'),
     ],

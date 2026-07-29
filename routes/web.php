@@ -50,7 +50,8 @@ Route::prefix('api')->middleware('clerk')->group(function () {
     Route::post('/goals/{goal}/deposit', [GoalController::class, 'deposit']);
     Route::apiResource('goals', GoalController::class);
 
-    // Subscriptions
+    // Subscriptions & Bills
+    Route::post('/subscriptions/{subscription}/process', [SubscriptionController::class, 'process']);
     Route::apiResource('subscriptions', SubscriptionController::class);
 
     // Reports & Insights

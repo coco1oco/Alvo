@@ -85,12 +85,22 @@
             <SignIn 
               v-if="!isSignUp" 
               routing="virtual" 
-              :appearance="clerkAppearance" 
+              :appearance="clerkAppearance"
+              signInUrl="/"
+              signUpUrl="/"
+              redirectUrl="/"
+              afterSignInUrl="/"
+              afterSignUpUrl="/"
             />
             <SignUp 
               v-else 
               routing="virtual" 
-              :appearance="clerkAppearance" 
+              :appearance="clerkAppearance"
+              signInUrl="/"
+              signUpUrl="/"
+              redirectUrl="/"
+              afterSignInUrl="/"
+              afterSignUpUrl="/"
             />
           </template>
         </div>
@@ -246,6 +256,30 @@ const clerkAppearance = computed(() => {
         color: isDarkMode ? '#A1A1AA' : '#71717A',
         fontSize: '0.75rem',
         letterSpacing: '0.05em'
+      },
+      otpCodeField: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      },
+      otpCodeFieldInputs: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '0.5rem',
+        width: '100%',
+        margin: '1rem 0'
+      },
+      otpCodeFieldInput: {
+        width: '2.75rem',
+        height: '3.25rem',
+        borderRadius: '0.75rem',
+        fontSize: '1.25rem',
+        fontWeight: '600',
+        textAlign: 'center',
+        borderColor: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(24,24,27,0.15)',
+        backgroundColor: isDarkMode ? '#1E1E1C' : '#FFFFFF',
+        color: isDarkMode ? '#FAF9F5' : '#18181B'
       }
     }
   }
@@ -474,9 +508,9 @@ const clerkAppearance = computed(() => {
   padding-top: 0 !important;
 }
 
-:deep(.cl-formFieldInput),
-:deep(.cl-input),
-:deep(.cl-formFieldInputGroup) {
+:deep(.cl-formFieldInput:not(.cl-otpCodeFieldInput)),
+:deep(.cl-input:not(.cl-otpCodeFieldInput)),
+:deep(.cl-formFieldInputGroup:not(.cl-otpCodeFieldInputs)) {
   width: 100% !important;
   box-sizing: border-box !important;
   border-radius: 0.75rem !important;
@@ -487,6 +521,40 @@ const clerkAppearance = computed(() => {
 :deep(.cl-formField) {
   width: 100% !important;
   overflow: visible !important;
+}
+
+/* Verification / OTP Code input overrides */
+:deep(.cl-otpCodeField) {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+:deep(.cl-otpCodeFieldInputs) {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  margin: 1rem 0 !important;
+}
+
+:deep(.cl-otpCodeFieldInput),
+:deep(input[autocomplete="one-time-code"]),
+:deep(.cl-verificationCodeInput) {
+  width: 2.75rem !important;
+  min-width: 2.5rem !important;
+  height: 3.25rem !important;
+  flex: 0 0 2.75rem !important;
+  border-radius: 0.75rem !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .auth-mode-footer {

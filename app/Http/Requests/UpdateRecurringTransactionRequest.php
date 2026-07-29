@@ -28,6 +28,9 @@ class UpdateRecurringTransactionRequest extends FormRequest
             'next_due_date' => 'sometimes|required|date',
             'is_active' => 'sometimes|boolean',
             'auto_process' => 'sometimes|boolean',
+            'is_subscription' => 'nullable|boolean',
+            'logo_url' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:30',
         ];
     }
 }

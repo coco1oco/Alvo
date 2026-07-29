@@ -43,6 +43,12 @@ class VerifyClerkToken
             $jwks = JWK::parseKeySet($keys);
             $decoded = JWT::decode($token, $jwks);
 
+            // Validate Issuer (iss) and Authorized Party (azp) / Audience (aud)
+            $issuer = $decoded->iss ?? '';
+            if (!str_contains($issuer, 'clerk')) {
+                throw new \RuntimeException('Invalid token issuer.');
+            }
+
             // Sync user to database
             $clerkId = $decoded->sub;
             $email = $decoded->email ?? $decoded->email_address ?? $decoded->primary_email ?? null;

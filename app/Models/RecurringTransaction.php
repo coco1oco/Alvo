@@ -23,6 +23,9 @@ class RecurringTransaction extends Model
         'next_due_date',
         'is_active',
         'auto_process',
+        'is_subscription',
+        'logo_url',
+        'color',
     ];
 
     protected $casts = [
@@ -31,6 +34,7 @@ class RecurringTransaction extends Model
         'next_due_date' => 'date',
         'is_active' => 'boolean',
         'auto_process' => 'boolean',
+        'is_subscription' => 'boolean',
     ];
 
     public function user(): BelongsTo

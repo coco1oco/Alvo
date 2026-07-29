@@ -40,30 +40,29 @@ class DashboardController extends AbstractController
             ->whereMonth('date', $monthNum)
             ->sum('amount');
 
-        // Monthly cashflow - last 6 months grouped by month
+        // Monthly cashflow - last 6 months grouped by month in PHP for DB compatibility
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth()->toDateString();
+        $recentTxns = $user->transactions()
+            ->where('date', '>=', $sixMonthsAgo)
+            ->whereIn('type', ['income', 'expense'])
+            ->get();
+
+        $cashflowRaw = $recentTxns->groupBy(fn ($t) => \Carbon\Carbon::parse($t->date)->format('Y-m'));
+
         $cashflow = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $y = $date->year;
-            $m = $date->month;
+            $ym = $date->format('Y-m');
             $label = $date->format('M Y');
+            $txns = $cashflowRaw->get($ym, collect());
 
-            $income = $user->transactions()
-                ->where('type', 'income')
-                ->whereYear('date', $y)
-                ->whereMonth('date', $m)
-                ->sum('amount');
-
-            $expense = $user->transactions()
-                ->where('type', 'expense')
-                ->whereYear('date', $y)
-                ->whereMonth('date', $m)
-                ->sum('amount');
+            $income = (float) $txns->where('type', 'income')->sum('amount');
+            $expense = (float) $txns->where('type', 'expense')->sum('amount');
 
             $cashflow[] = [
                 'label' => $label,
-                'income' => (float) $income,
-                'expense' => (float) $expense,
+                'income' => $income,
+                'expense' => $expense,
             ];
         }
 
@@ -82,27 +81,30 @@ class DashboardController extends AbstractController
                 'total' => (float) $row->total,
             ]);
 
-        // Budget status this month
+        // Budget status this month (bulk query spending instead of N+1 per budget)
+        $spentByCat = $user->transactions()
+            ->where('type', 'expense')
+            ->whereYear('date', $year)
+            ->whereMonth('date', $monthNum)
+            ->select('category_id', DB::raw('SUM(amount) as total_spent'))
+            ->groupBy('category_id')
+            ->pluck('total_spent', 'category_id');
+
         $budgets = $user->budgets()
             ->with('category')
             ->where('month', $month)
             ->get()
-            ->map(function ($budget) use ($user, $year, $monthNum) {
-                $spent = $user->transactions()
-                    ->where('type', 'expense')
-                    ->where('category_id', $budget->category_id)
-                    ->whereYear('date', $year)
-                    ->whereMonth('date', $monthNum)
-                    ->sum('amount');
+            ->map(function ($budget) use ($spentByCat) {
+                $spent = (float) ($spentByCat->get($budget->category_id) ?? 0);
 
                 return [
                     'id' => $budget->id,
                     'category' => $budget->category?->name,
                     'color' => $budget->category?->color ?? '#6366f1',
                     'budget' => (float) $budget->amount,
-                    'spent' => (float) $spent,
+                    'spent' => $spent,
                     'percentage' => $budget->amount > 0
-                        ? round(((float) $spent / (float) $budget->amount) * 100, 1)
+                        ? round(($spent / (float) $budget->amount) * 100, 1)
                         : 0,
                 ];
             });

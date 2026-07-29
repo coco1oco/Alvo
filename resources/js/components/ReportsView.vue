@@ -147,10 +147,10 @@
               v-for="day in heatmapDays"
               :key="day.dateStr"
               class="heatmap-cell group relative"
-              :style="{ backgroundColor: getHeatmapColor(day.amount) }"
+              :style="day.empty ? { visibility: 'hidden' } : { backgroundColor: getHeatmapColor(day.amount) }"
             >
               <!-- Tooltip -->
-              <div class="heatmap-tooltip">
+              <div v-if="!day.empty" class="heatmap-tooltip">
                 <span class="font-bold block">{{ day.dateStr }}</span>
                 <span>{{ day.amount > 0 ? formatCurrency(day.amount) : 'No spend' }}</span>
               </div>
@@ -236,6 +236,17 @@ const heatmapDays = computed(() => {
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth()
+  
+  // Handle weekStart setting
+  const firstDayOfMonth = new Date(year, month, 1).getDay() // 0 = Sun, 1 = Mon
+  const weekStart = localStorage.getItem('alvo_pref_week_start') === 'monday' ? 1 : 0
+  let paddingDays = firstDayOfMonth - weekStart
+  if (paddingDays < 0) paddingDays += 7
+  
+  for (let p = 0; p < paddingDays; p++) {
+    days.push({ empty: true, dateStr: `padding-start-${p}` })
+  }
+
   const daysInMonth = new Date(year, month + 1, 0).getDate()
 
   for (let d = 1; d <= daysInMonth; d++) {
