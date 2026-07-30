@@ -6,7 +6,12 @@
                 <h3 class="modal-title">
                     {{ isEdit ? "Edit Transaction" : "Add Transaction" }}
                 </h3>
-                <button type="button" @click="$emit('close')" class="modal-close" title="Close">
+                <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="modal-close"
+                    title="Close"
+                >
                     <svg
                         class="w-5 h-5"
                         fill="none"
@@ -43,8 +48,21 @@
                     will reduce your card balance.
                 </div>
 
+                <div
+                    v-if="isPayBillMode && !hasPayableBillAmount"
+                    class="alert-danger"
+                >
+                    This card has no balance due, so a pay bill transaction
+                    cannot be created.
+                </div>
+
                 <!-- Responsive Grid Layout (Single Column centered for Income/Transfer, 2-Column for Expense) -->
-                <div :class="['modal-grid', form.type !== 'expense' ? 'modal-grid--single' : '']">
+                <div
+                    :class="[
+                        'modal-grid',
+                        form.type !== 'expense' ? 'modal-grid--single' : '',
+                    ]"
+                >
                     <!-- LEFT COLUMN: Main Details & Receipt Upload -->
                     <div class="grid-col left-col">
                         <!-- Type Selector -->
@@ -53,7 +71,11 @@
                             <div class="type-toggle">
                                 <button
                                     type="button"
-                                    v-for="t in ['income', 'expense', 'transfer']"
+                                    v-for="t in [
+                                        'income',
+                                        'expense',
+                                        'transfer',
+                                    ]"
                                     :key="t"
                                     @click="!isPayBillMode && (form.type = t)"
                                     :class="[
@@ -75,7 +97,9 @@
                             <div class="form-col amount-col">
                                 <label class="label">Amount</label>
                                 <div class="hero-amount-wrapper">
-                                    <span class="currency-symbol">{{ getCurrencySymbol() }}</span>
+                                    <span class="currency-symbol">{{
+                                        getCurrencySymbol()
+                                    }}</span>
                                     <input
                                         v-model="form.amount"
                                         type="number"
@@ -102,7 +126,9 @@
                         <!-- From Account -->
                         <div>
                             <label class="label">{{
-                                form.type === "transfer" ? "From Account" : "Account"
+                                form.type === "transfer"
+                                    ? "From Account"
+                                    : "Account"
                             }}</label>
                             <select
                                 v-model="form.account_id"
@@ -145,7 +171,10 @@
                         <!-- Category (income / expense only) -->
                         <div v-if="form.type !== 'transfer'">
                             <label class="label">Category</label>
-                            <select v-model="form.category_id" class="input-field">
+                            <select
+                                v-model="form.category_id"
+                                class="input-field"
+                            >
                                 <option value="">No category</option>
                                 <option
                                     v-for="cat in filteredCategories"
@@ -161,7 +190,9 @@
                         <div>
                             <label class="label"
                                 >Description
-                                <span class="label-optional">(optional)</span></label
+                                <span class="label-optional"
+                                    >(optional)</span
+                                ></label
                             >
                             <input
                                 v-model="form.description"
@@ -173,14 +204,20 @@
 
                         <!-- Receipt Attachment Dropzone / Clipboard Paste -->
                         <div class="receipt-section">
-                            <label class="label flex items-center justify-between">
+                            <label
+                                class="label flex items-center justify-between"
+                            >
                                 <span>Receipt / Screenshot</span>
-                                <span class="text-xs text-muted font-normal">Paste image with Ctrl+V</span>
+                                <span class="text-xs text-muted font-normal"
+                                    >Paste image with Ctrl+V</span
+                                >
                             </label>
 
                             <div
                                 class="receipt-dropzone"
-                                :class="{ 'receipt-dropzone--active': isDragging }"
+                                :class="{
+                                    'receipt-dropzone--active': isDragging,
+                                }"
                                 @dragover.prevent="isDragging = true"
                                 @dragleave.prevent="isDragging = false"
                                 @drop.prevent="handleDrop"
@@ -194,10 +231,19 @@
                                     id="receipt-file-input"
                                 />
 
-                                <div v-if="attachmentPreviewUrl || existingAttachmentPath" class="receipt-preview">
+                                <div
+                                    v-if="
+                                        attachmentPreviewUrl ||
+                                        existingAttachmentPath
+                                    "
+                                    class="receipt-preview"
+                                >
                                     <img
                                         v-if="isImageAttachment"
-                                        :src="attachmentPreviewUrl || existingAttachmentPath"
+                                        :src="
+                                            attachmentPreviewUrl ||
+                                            existingAttachmentPath
+                                        "
                                         alt="Receipt thumbnail"
                                         class="receipt-thumb"
                                     />
@@ -205,31 +251,72 @@
                                         <span>📄 PDF Document</span>
                                     </div>
                                     <div class="receipt-meta">
-                                        <span class="truncate text-xs font-medium text-primary-color">{{ selectedFileName || 'Attached Receipt' }}</span>
-                                        <button type="button" @click="clearAttachment" class="text-xs text-danger hover:underline">Remove</button>
+                                        <span
+                                            class="truncate text-xs font-medium text-primary-color"
+                                            >{{
+                                                selectedFileName ||
+                                                "Attached Receipt"
+                                            }}</span
+                                        >
+                                        <button
+                                            type="button"
+                                            @click="clearAttachment"
+                                            class="text-xs text-danger hover:underline"
+                                        >
+                                            Remove
+                                        </button>
                                     </div>
                                 </div>
 
-                                <label v-else for="receipt-file-input" class="dropzone-prompt">
-                                    <svg class="w-5 h-5 text-muted mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <label
+                                    v-else
+                                    for="receipt-file-input"
+                                    class="dropzone-prompt"
+                                >
+                                    <svg
+                                        class="w-5 h-5 text-muted mb-1"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.8"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
                                     </svg>
-                                    <span class="text-xs font-semibold text-primary">Upload screenshot / receipt</span>
-                                    <span class="text-[11px] text-muted">Click, drag &amp; drop, or paste (Ctrl+V)</span>
+                                    <span
+                                        class="text-xs font-semibold text-primary"
+                                        >Upload screenshot / receipt</span
+                                    >
+                                    <span class="text-[11px] text-muted"
+                                        >Click, drag &amp; drop, or paste
+                                        (Ctrl+V)</span
+                                    >
                                 </label>
                             </div>
                         </div>
                     </div>
 
                     <!-- RIGHT COLUMN: Expense-only options (Reimbursable & Split Expenses) -->
-                    <div v-if="form.type === 'expense'" class="grid-col right-col">
+                    <div
+                        v-if="form.type === 'expense'"
+                        class="grid-col right-col"
+                    >
                         <!-- Reimbursable Expense Switch (Expense type only) -->
                         <div class="reimbursable-card">
                             <label class="reimbursable-toggle">
-                                <input v-model="form.is_reimbursable" type="checkbox" />
+                                <input
+                                    v-model="form.is_reimbursable"
+                                    type="checkbox"
+                                />
                                 <span>
                                     <strong>Reimbursable expense</strong>
-                                    <small>Mark for company or personal reimbursement</small>
+                                    <small
+                                        >Mark for company or personal
+                                        reimbursement</small
+                                    >
                                 </span>
                             </label>
                         </div>
@@ -238,10 +325,16 @@
                         <div class="split-section">
                             <div class="split-toggle-row">
                                 <label class="split-toggle">
-                                    <input v-model="form.is_split" type="checkbox" />
+                                    <input
+                                        v-model="form.is_split"
+                                        type="checkbox"
+                                    />
                                     <span>
                                         <strong>Split this expense</strong>
-                                        <small>Track shares owed by other people</small>
+                                        <small
+                                            >Track shares owed by other
+                                            people</small
+                                        >
                                     </span>
                                 </label>
                             </div>
@@ -251,29 +344,48 @@
                                     <div class="split-mode-selector">
                                         <button
                                             type="button"
-                                            :class="['split-mode-btn', form.split_mode === 'equal' ? 'split-mode-btn--active' : '']"
+                                            :class="[
+                                                'split-mode-btn',
+                                                form.split_mode === 'equal'
+                                                    ? 'split-mode-btn--active'
+                                                    : '',
+                                            ]"
                                             @click="setSplitMode('equal')"
                                         >
                                             Equal
                                         </button>
                                         <button
                                             type="button"
-                                            :class="['split-mode-btn', form.split_mode === 'custom' ? 'split-mode-btn--active' : '']"
+                                            :class="[
+                                                'split-mode-btn',
+                                                form.split_mode === 'custom'
+                                                    ? 'split-mode-btn--active'
+                                                    : '',
+                                            ]"
                                             @click="setSplitMode('custom')"
                                         >
                                             Custom
                                         </button>
                                     </div>
 
-                                    <label v-if="form.split_mode === 'equal'" class="equal-self-checkbox">
-                                        <input v-model="form.split_include_self" type="checkbox" @change="recalculateEqualSplit" />
+                                    <label
+                                        v-if="form.split_mode === 'equal'"
+                                        class="equal-self-checkbox"
+                                    >
+                                        <input
+                                            v-model="form.split_include_self"
+                                            type="checkbox"
+                                            @change="recalculateEqualSplit"
+                                        />
                                         <span>Inc. me</span>
                                     </label>
                                 </div>
 
                                 <div class="split-rows">
                                     <div
-                                        v-for="(participant, index) in form.split_participants"
+                                        v-for="(
+                                            participant, index
+                                        ) in form.split_participants"
                                         :key="participant.id"
                                         class="split-row-compact"
                                     >
@@ -290,16 +402,40 @@
                                             min="0.01"
                                             placeholder="0.00"
                                             class="input-field input-field--sm"
-                                            :readonly="form.split_mode === 'equal'"
+                                            :readonly="
+                                                form.split_mode === 'equal'
+                                            "
                                         />
-                                        <label class="settle-compact-check" title="Mark as paid">
-                                            <input v-model="participant.is_settled" type="checkbox" />
-                                            <span :class="participant.is_settled ? 'text-success' : 'text-muted'">{{ participant.is_settled ? 'Paid' : 'Unpaid' }}</span>
+                                        <label
+                                            class="settle-compact-check"
+                                            title="Mark as paid"
+                                        >
+                                            <input
+                                                v-model="participant.is_settled"
+                                                type="checkbox"
+                                            />
+                                            <span
+                                                :class="
+                                                    participant.is_settled
+                                                        ? 'text-success'
+                                                        : 'text-muted'
+                                                "
+                                                >{{
+                                                    participant.is_settled
+                                                        ? "Paid"
+                                                        : "Unpaid"
+                                                }}</span
+                                            >
                                         </label>
                                         <button
-                                            v-if="form.split_participants.length > 1"
+                                            v-if="
+                                                form.split_participants.length >
+                                                1
+                                            "
                                             type="button"
-                                            @click="removeSplitParticipant(index)"
+                                            @click="
+                                                removeSplitParticipant(index)
+                                            "
                                             class="split-remove-btn-compact"
                                         >
                                             ×
@@ -317,8 +453,22 @@
                                     </button>
 
                                     <div class="split-summary-compact">
-                                        <span>Tracked: <strong>{{ formatCurrency(splitParticipantTotal) }}</strong></span>
-                                        <span>Mine: <strong>{{ formatCurrency(splitRemainingAmount) }}</strong></span>
+                                        <span
+                                            >Tracked:
+                                            <strong>{{
+                                                formatCurrency(
+                                                    splitParticipantTotal,
+                                                )
+                                            }}</strong></span
+                                        >
+                                        <span
+                                            >Mine:
+                                            <strong>{{
+                                                formatCurrency(
+                                                    splitRemainingAmount,
+                                                )
+                                            }}</strong></span
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -348,7 +498,9 @@
                     </button>
                     <button
                         type="submit"
-                        :disabled="loading"
+                        :disabled="
+                            loading || (isPayBillMode && !hasPayableBillAmount)
+                        "
                         class="modal-btn submit-btn"
                         :class="submitClass"
                     >
@@ -383,6 +535,7 @@ const toast = inject("toast");
 
 const isPayBillMode = computed(() => !!props.payBillTargetId);
 const isEdit = computed(() => !!props.transaction);
+const hasPayableBillAmount = computed(() => Number(props.payBillAmount) > 0);
 const loading = ref(false);
 const error = ref("");
 const accounts = ref([]);
@@ -399,14 +552,25 @@ const isImageAttachment = computed(() => {
         return selectedFile.value.type.startsWith("image/");
     }
     const path = existingAttachmentPath.value;
-    return path && (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png") || path.endsWith(".webp"));
+    return (
+        path &&
+        (path.endsWith(".jpg") ||
+            path.endsWith(".jpeg") ||
+            path.endsWith(".png") ||
+            path.endsWith(".webp"))
+    );
 });
 
 const form = reactive({
     type: isPayBillMode.value
         ? "transfer"
         : (props.transaction?.type ?? "expense"),
-    account_id: props.transaction?.account_id || props.defaultAccountId || (localStorage.getItem('alvo_pref_default_account') ? Number(localStorage.getItem('alvo_pref_default_account')) : ""),
+    account_id:
+        props.transaction?.account_id ||
+        props.defaultAccountId ||
+        (localStorage.getItem("alvo_pref_default_account")
+            ? Number(localStorage.getItem("alvo_pref_default_account"))
+            : ""),
     to_account_id: isPayBillMode.value
         ? props.payBillTargetId
         : (props.transaction?.to_account_id ?? ""),
@@ -555,7 +719,11 @@ function handlePaste(event) {
         if (items[i].type.startsWith("image/")) {
             const blob = items[i].getAsFile();
             if (blob) {
-                const pastedFile = new File([blob], `screenshot-${Date.now()}.png`, { type: blob.type });
+                const pastedFile = new File(
+                    [blob],
+                    `screenshot-${Date.now()}.png`,
+                    { type: blob.type },
+                );
                 setFile(pastedFile);
                 break;
             }
@@ -590,6 +758,11 @@ async function fetchFormData() {
 
 async function submit() {
     error.value = "";
+    if (isPayBillMode.value && !hasPayableBillAmount.value) {
+        error.value = "This card has no balance due.";
+        return;
+    }
+
     loading.value = true;
     try {
         const isSplitExpense = form.type === "expense" && form.is_split;
@@ -620,16 +793,32 @@ async function submit() {
             formData.append("account_id", form.account_id);
             formData.append("amount", form.amount);
             formData.append("date", form.date);
-            if (form.description) formData.append("description", form.description);
-            formData.append("is_reimbursable", (form.type === "expense" && form.is_reimbursable) ? "1" : "0");
+            if (form.description)
+                formData.append("description", form.description);
+            formData.append(
+                "is_reimbursable",
+                form.type === "expense" && form.is_reimbursable ? "1" : "0",
+            );
             formData.append("is_split", isSplitExpense ? "1" : "0");
             if (isSplitExpense) {
                 formData.append("split_data[split_mode]", form.split_mode);
-                formData.append("split_data[include_self]", form.split_include_self ? "1" : "0");
+                formData.append(
+                    "split_data[include_self]",
+                    form.split_include_self ? "1" : "0",
+                );
                 splitParticipants.forEach((p, idx) => {
-                    formData.append(`split_data[participants][${idx}][name]`, p.name);
-                    formData.append(`split_data[participants][${idx}][amount]`, p.amount);
-                    formData.append(`split_data[participants][${idx}][is_settled]`, p.is_settled ? "1" : "0");
+                    formData.append(
+                        `split_data[participants][${idx}][name]`,
+                        p.name,
+                    );
+                    formData.append(
+                        `split_data[participants][${idx}][amount]`,
+                        p.amount,
+                    );
+                    formData.append(
+                        `split_data[participants][${idx}][is_settled]`,
+                        p.is_settled ? "1" : "0",
+                    );
                 });
             }
             if (form.type === "transfer") {
@@ -641,9 +830,13 @@ async function submit() {
 
             if (isEdit.value) {
                 formData.append("_method", "PUT");
-                await axios.post(`/api/transactions/${props.transaction.id}`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                await axios.post(
+                    `/api/transactions/${props.transaction.id}`,
+                    formData,
+                    {
+                        headers: { "Content-Type": "multipart/form-data" },
+                    },
+                );
             } else {
                 await axios.post("/api/transactions", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
@@ -656,7 +849,8 @@ async function submit() {
                 amount: form.amount,
                 date: form.date,
                 description: form.description || null,
-                is_reimbursable: form.type === "expense" ? form.is_reimbursable : false,
+                is_reimbursable:
+                    form.type === "expense" ? form.is_reimbursable : false,
                 is_split: isSplitExpense,
                 split_data: isSplitExpense
                     ? {
@@ -673,7 +867,10 @@ async function submit() {
             }
 
             if (isEdit.value) {
-                await axios.put(`/api/transactions/${props.transaction.id}`, payload);
+                await axios.put(
+                    `/api/transactions/${props.transaction.id}`,
+                    payload,
+                );
             } else {
                 await axios.post("/api/transactions", payload);
             }
@@ -1156,12 +1353,24 @@ watch(
     color: #fff;
 }
 
-.submit-btn--income { background-color: var(--success); }
-.submit-btn--expense { background-color: var(--danger); }
-.submit-btn--transfer { background-color: var(--primary); }
+.submit-btn--income {
+    background-color: var(--success);
+}
+.submit-btn--expense {
+    background-color: var(--danger);
+}
+.submit-btn--transfer {
+    background-color: var(--primary);
+}
 
-.submit-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
 .btn-spinner {
     width: 12px;

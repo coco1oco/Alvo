@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBudgetRequest;
+use App\Http\Requests\UpdateBudgetRequest;
 use App\Models\Budget;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,29 @@ class BudgetController extends AbstractController
         );
 
         return response()->json($budget->load('category'), 201);
+    }
+
+    /**
+     * Update an existing budget for the authenticated user.
+     *
+     * @param  UpdateBudgetRequest  $request  the incoming HTTP request
+     * @param  Budget  $budget  the budget to update
+     */
+    public function update(UpdateBudgetRequest $request, Budget $budget): JsonResponse
+    {
+        abort_if($budget->user_id !== $request->user()->id, 403);
+
+        $data = $request->validated();
+
+        $request->user()->categories()->findOrFail($data['category_id']);
+
+        $budget->update([
+            'category_id' => $data['category_id'],
+            'amount' => $data['amount'],
+            'month' => $data['month'],
+        ]);
+
+        return response()->json($budget->fresh('category'));
     }
 
     /**

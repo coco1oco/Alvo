@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGoalRequest;
 use App\Http\Requests\UpdateGoalRequest;
 use App\Models\Goal;
+use App\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -63,19 +64,31 @@ class GoalController extends AbstractController
     /**
      * Deposit/add funds directly to a goal's current saved amount.
      */
-    public function deposit(Request $request, Goal $goal): JsonResponse
+    public function deposit(Request $request, Goal $goal, TransactionService $service): JsonResponse
     {
         abort_if($goal->user_id !== $request->user()->id, 403);
 
-        $request->validate([
+        $data = $request->validate([
             'amount' => 'required|numeric|min:0.01',
+            'from_account_id' => 'required|integer|exists:accounts,id',
         ]);
 
-        $goal->increment('current_amount', (float) $request->amount);
+        abort_if($goal->linked_account_id == null, 422, 'Link a savings account to deposit into this goal.');
+        abort_if((int) $data['from_account_id'] === (int) $goal->linked_account_id, 422, 'Choose a different source account.');
+
+        $transaction = $service->createTransaction($request->user(), [
+            'account_id' => $data['from_account_id'],
+            'to_account_id' => $goal->linked_account_id,
+            'type' => 'transfer',
+            'amount' => (float) $data['amount'],
+            'description' => 'Deposit to '.$goal->name,
+            'date' => now()->toDateString(),
+        ]);
 
         return response()->json([
             'message' => 'Deposit added to goal',
             'goal' => $goal->fresh('linkedAccount'),
+            'transaction' => $transaction->load(['account', 'toAccount', 'category']),
         ]);
     }
 }

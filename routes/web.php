@@ -41,6 +41,7 @@ Route::prefix('api')->middleware('clerk')->group(function () {
 
     // Budgets
     Route::apiResource('budgets', BudgetController::class)->only(['index', 'store', 'destroy']);
+    Route::put('/budgets/{budget}', [BudgetController::class, 'update']);
 
     // Recurring Transactions
     Route::post('/recurring-transactions/{recurringTransaction}/process', [RecurringTransactionController::class, 'process']);
