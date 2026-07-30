@@ -24,9 +24,10 @@
 
       <!-- App Content (only shown when loaded) -->
       <template v-if="appInitialized && isLoaded && !isSigningOut">
-        <!-- Auth Screen -->
-        <AuthView v-if="!isSignedIn" />
-
+        <template v-if="!isSignedIn">
+          <LandingView v-if="!showAuth" @login="handleLoginAction" />
+          <AuthView v-else :initial-action="authAction" @back="handleBackToLanding" />
+        </template>
         <!-- Main App Shell -->
         <div v-else class="flex h-screen overflow-hidden">
 
@@ -182,6 +183,7 @@ import { ref, provide, onMounted, watch, defineComponent, h, onUnmounted } from 
 import axios from 'axios'
 import { useAuth, useUser } from '@clerk/vue'
 import AuthView from './AuthView.vue'
+import LandingView from './LandingView.vue'
 import DashboardView from './DashboardView.vue'
 import TransactionsView from './TransactionsView.vue'
 import AccountsView from './AccountsView.vue'
@@ -289,10 +291,40 @@ const IconSettings = defineComponent({
   ])
 })
 
-// ── State ─────────────────────────────────────────────────────
+// ── State & Unauthenticated URL Routing ──────────────────────
 const currentView = ref('dashboard')
 const toasts      = ref([])
 const refreshKey  = ref(0)
+
+const initialPath = window.location.pathname
+const showAuth    = ref(initialPath === '/login' || initialPath === '/signup')
+const authAction  = ref(initialPath === '/signup' ? 'signup' : 'signin')
+
+function handleLoginAction(action) {
+  authAction.value = action
+  showAuth.value = true
+  const targetPath = action === 'signup' ? '/signup' : '/login'
+  if (window.location.pathname !== targetPath) {
+    window.history.pushState({ auth: true, action }, '', targetPath)
+  }
+}
+
+function handleBackToLanding() {
+  showAuth.value = false
+  if (window.location.pathname !== '/') {
+    window.history.pushState({ auth: false }, '', '/')
+  }
+}
+
+const handlePopState = () => {
+  const p = window.location.pathname
+  if (p === '/login' || p === '/signup') {
+    showAuth.value = true
+    authAction.value = p === '/signup' ? 'signup' : 'signin'
+  } else {
+    showAuth.value = false
+  }
+}
 
 // ── Clerk Auth ────────────────────────────────────────────────
 const { isLoaded, isSignedIn, signOut, getToken } = useAuth()
@@ -316,8 +348,13 @@ const axiosInterceptor = axios.interceptors.request.use(async (config) => {
   return config
 })
 
+onMounted(() => {
+  window.addEventListener('popstate', handlePopState)
+})
+
 onUnmounted(() => {
   axios.interceptors.request.eject(axiosInterceptor)
+  window.removeEventListener('popstate', handlePopState)
 })
 
 // ── Dark Mode ─────────────────────────────────────────────────

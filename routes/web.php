@@ -13,9 +13,9 @@ use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 // SPA entry point — serve the Vue app for all non-API routes
-Route::get('/', function () {
+Route::get('/{any?}', function () {
     return view('welcome');
-});
+})->where('any', '^(?!api).*$');
 
 // Protected API routes (Clerk)
 Route::prefix('api')->middleware('clerk')->group(function () {
