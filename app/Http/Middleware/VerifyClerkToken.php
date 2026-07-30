@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Account;
+use App\Models\Category;
 use App\Models\User;
 use Closure;
 use Firebase\JWT\JWK;
@@ -87,10 +89,10 @@ class VerifyClerkToken
                 ];
 
                 foreach ($defaultCategories as $cat) {
-                    \App\Models\Category::create(array_merge($cat, ['user_id' => $user->id]));
+                    Category::create(array_merge($cat, ['user_id' => $user->id]));
                 }
                 foreach ($defaultAccounts as $acc) {
-                    \App\Models\Account::create(array_merge($acc, ['user_id' => $user->id]));
+                    Account::create(array_merge($acc, ['user_id' => $user->id]));
                 }
             }
 

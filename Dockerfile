@@ -19,7 +19,7 @@ FROM composer:2 AS composer-builder
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs --no-scripts
 
 # ==========================================
 # Stage 3: Production Runtime (PHP 8.3-FPM + Nginx)

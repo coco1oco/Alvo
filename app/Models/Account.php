@@ -59,6 +59,10 @@ class Account extends Model
         $delta = number_format((float) $amount, 2, '.', '');
         $newBalance = bcadd($current, $delta, 2);
 
+        if ($this->type !== 'credit_card' && bccomp($newBalance, '0.00', 2) === -1) {
+            abort(422, "Insufficient funds in {$this->name}. Transaction exceeds available balance.");
+        }
+
         $this->update(['balance' => $newBalance]);
     }
 }

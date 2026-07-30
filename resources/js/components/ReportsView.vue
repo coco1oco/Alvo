@@ -396,12 +396,24 @@ function renderCharts() {
   }
 }
 
-function exportCSV() {
+async function exportCSV() {
   let url = '/api/transactions/export'
   if (currentPeriod.value === 'custom' && customFrom.value && customTo.value) {
     url += `?from=${customFrom.value}&to=${customTo.value}`
   }
-  window.open(url, '_blank')
+  
+  try {
+    const response = await axios.get(url, { responseType: 'blob' })
+    const blobUrl = URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.setAttribute('download', 'alvo-reports.csv')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (e) {
+    console.error('Export failed', e)
+  }
 }
 
 watch(() => props.isDark, () => renderCharts())
