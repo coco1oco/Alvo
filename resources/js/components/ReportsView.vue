@@ -74,7 +74,7 @@
         <div class="glass-card stat-card">
           <span class="stat-label">Avg. Daily Spend</span>
           <h2 class="stat-value tabular-nums amount-negative">{{ formatCurrency(kpis.avg_daily_spend) }}</h2>
-          <p class="stat-subtext">Over {{ kpis.days_count }} day{{ kpis.days_count === 1 ? '' : 's' }}</p>
+          <p class="stat-subtext">Over {{ Math.round(kpis.days_count) }} day{{ Math.round(kpis.days_count) === 1 ? '' : 's' }}</p>
         </div>
 
         <!-- Income vs Expenses Total -->

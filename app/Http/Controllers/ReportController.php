@@ -30,8 +30,8 @@ class ReportController extends AbstractController
 
         $savingsRate = $totalIncome > 0 ? round(max(($netCashflow / $totalIncome) * 100, 0), 1) : 0;
 
-        $daysInPeriod = max($fromDate->diffInDays($toDate) + 1, 1);
-        $avgDailySpend = round($totalExpense / $daysInPeriod, 2);
+        $daysInPeriod = max((int) $fromDate->diffInDays($toDate) + 1, 1);
+        $avgDailySpend = $daysInPeriod > 0 ? round($totalExpense / $daysInPeriod, 2) : 0;
 
         // Monthly Income vs Expense Trend (last 6 to 12 months)
         $trendMonths = 6;

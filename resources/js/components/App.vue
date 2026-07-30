@@ -375,18 +375,17 @@ function toggleTheme() {
   isDark.value = !isDark.value
 }
 
-// ── Nav ───────────────────────────────────────────────────────
 const navItems = [
   { view: 'dashboard',     label: 'Dashboard',     icon: IconDashboard },
   { view: 'transactions',  label: 'Transactions',  icon: IconTransactions },
-  { view: 'splits',        label: 'Splits & Debts', icon: IconSplits },
   { view: 'accounts',      label: 'Accounts',      icon: IconAccounts },
   { view: 'credit-cards',  label: 'Credit Cards',  icon: IconCreditCard },
+  { view: 'budgets',       label: 'Budgets',       icon: IconBudgets },
+  { view: 'categories',    label: 'Categories',    icon: IconCategories },
+  { view: 'splits',        label: 'Splits & Debts', icon: IconSplits },
   { view: 'goals',         label: 'Goals',         icon: IconGoals },
   { view: 'subscriptions', label: 'Bills & Subscriptions', icon: IconSubscriptions },
   { view: 'reports',       label: 'Reports',       icon: IconReports },
-  { view: 'categories',    label: 'Categories',    icon: IconCategories },
-  { view: 'budgets',       label: 'Budgets',       icon: IconBudgets },
   { view: 'settings',      label: 'Settings',      icon: IconSettings },
 ]
 

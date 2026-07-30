@@ -98,7 +98,7 @@
                   </div>
                   <div>
                     <h3 class="font-bold text-sm text-primary-color">{{ sub.name }}</h3>
-                    <p class="text-xs text-muted">{{ sub.account?.name || 'Default Account' }}</p>
+                    <p class="text-xs text-muted">{{ sub.category?.name || 'Uncategorized' }} &bull; {{ sub.account?.name || 'Default Account' }}</p>
                   </div>
                 </div>
 
@@ -195,6 +195,13 @@
                 <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.name }}</option>
               </select>
             </div>
+            <div>
+              <label class="label">Category</label>
+              <select v-model="form.category_id" class="input-field">
+                <option value="">Select category...</option>
+                <option v-for="cat in categories.filter(c => c.type === 'expense')" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+            </div>
           </div>
 
           <div>
@@ -228,6 +235,7 @@ const toast = inject('toast')
 const loading = ref(true)
 const subscriptions = ref([])
 const accounts = ref([])
+const categories = ref([])
 const showModal = ref(false)
 const editingSub = ref(null)
 const saving = ref(false)
@@ -252,6 +260,7 @@ const form = reactive({
   billing_cycle: 'monthly',
   next_renewal_date: new Date().toISOString().substring(0, 10),
   account_id: '',
+  category_id: '',
   color: '#6366f1',
   is_active: true,
 })
@@ -298,12 +307,14 @@ function getRenewalBadgeClass(sub) {
 async function fetchSubs() {
   loading.value = true
   try {
-    const [subRes, accRes] = await Promise.all([
+    const [subRes, accRes, catRes] = await Promise.all([
       axios.get('/api/subscriptions'),
       axios.get('/api/accounts'),
+      axios.get('/api/categories'),
     ])
     subscriptions.value = subRes.data
     accounts.value = accRes.data
+    categories.value = catRes.data
   } catch (e) {
     toast('Failed to load subscriptions', 'error')
   } finally {
@@ -321,6 +332,7 @@ function openModal(sub = null) {
       billing_cycle: sub.billing_cycle,
       next_renewal_date: sub.next_renewal_date ? sub.next_renewal_date.substring(0, 10) : new Date().toISOString().substring(0, 10),
       account_id: sub.account_id ?? '',
+      category_id: sub.category_id ?? '',
       color: sub.color || '#6366f1',
       is_active: sub.is_active,
     })
@@ -331,6 +343,7 @@ function openModal(sub = null) {
       billing_cycle: 'monthly',
       next_renewal_date: new Date().toISOString().substring(0, 10),
       account_id: '',
+      category_id: '',
       color: '#6366f1',
       is_active: true,
     })
@@ -341,7 +354,6 @@ function openModal(sub = null) {
 function openModalWithPreset(preset) {
   openModal()
   form.name = preset.name
-  form.amount = preset.amount
   form.billing_cycle = preset.cycle
   form.color = preset.color
 }
@@ -354,6 +366,7 @@ async function saveSub() {
       ...form,
       amount: parseFloat(form.amount) || 0,
       account_id: form.account_id || null,
+      category_id: form.category_id || null,
     }
     if (editingSub.value) {
       await axios.put(`/api/subscriptions/${editingSub.value.id}`, payload)
