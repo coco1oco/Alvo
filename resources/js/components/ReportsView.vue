@@ -280,13 +280,12 @@ async function fetchReports() {
     cashflowTrend.value = res.data.cashflow_trend
     categoryReport.value = res.data.category_report
     dailyExpenses.value = res.data.daily_expenses
-
-    await nextTick()
-    renderCharts()
   } catch (e) {
     toast('Failed to load reports data', 'error')
   } finally {
     loading.value = false
+    await nextTick()
+    renderCharts()
   }
 }
 
@@ -294,8 +293,9 @@ function renderCharts() {
   const isDark = props.isDark
   const textColor = isDark ? '#94a3b8' : '#64748b'
   const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
+  const surfaceColor = isDark ? '#191919' : '#ffffff'
 
-  // Trend Chart
+  // Trend Chart (Smooth Area Line)
   if (trendChartCanvas.value) {
     if (trendChartInstance) trendChartInstance.destroy()
 
@@ -304,23 +304,52 @@ function renderCharts() {
     const expenseData = cashflowTrend.value.map(item => item.expense)
 
     trendChartInstance = new Chart(trendChartCanvas.value, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels,
         datasets: [
-          { label: 'Income', data: incomeData, backgroundColor: '#10b981', borderRadius: 6 },
-          { label: 'Expenses', data: expenseData, backgroundColor: '#ef4444', borderRadius: 6 },
+          { 
+            label: 'Income', 
+            data: incomeData, 
+            borderColor: '#10b981', 
+            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6
+          },
+          { 
+            label: 'Expenses', 
+            data: expenseData, 
+            borderColor: '#ef4444', 
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6
+          },
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { labels: { color: textColor } }
+          legend: { labels: { color: textColor, usePointStyle: true, boxWidth: 8 } },
+          tooltip: {
+            backgroundColor: surfaceColor,
+            titleColor: isDark ? '#fff' : '#000',
+            bodyColor: isDark ? '#cbd5e1' : '#475569',
+            borderColor: gridColor,
+            borderWidth: 1,
+            padding: 10
+          }
         },
         scales: {
-          x: { ticks: { color: textColor }, grid: { color: gridColor } },
-          y: { ticks: { color: textColor }, grid: { color: gridColor } }
+          x: { ticks: { color: textColor }, grid: { display: false } },
+          y: { ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true }
         }
       }
     })
@@ -338,15 +367,30 @@ function renderCharts() {
       type: 'doughnut',
       data: {
         labels,
-        datasets: [{ data, backgroundColor: colors, borderWidth: 0 }]
+        datasets: [{ 
+          data, 
+          backgroundColor: colors, 
+          borderWidth: 3,
+          borderColor: surfaceColor,
+          hoverOffset: 8
+        }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10 } }
+          legend: { position: 'bottom', labels: { color: textColor, usePointStyle: true, boxWidth: 8 } },
+          tooltip: {
+            backgroundColor: surfaceColor,
+            titleColor: isDark ? '#fff' : '#000',
+            bodyColor: isDark ? '#cbd5e1' : '#475569',
+            borderColor: gridColor,
+            borderWidth: 1,
+            padding: 10
+          }
         },
-        cutout: '70%'
+        cutout: '70%',
+        animation: { animateScale: true, animateRotate: true }
       }
     })
   }

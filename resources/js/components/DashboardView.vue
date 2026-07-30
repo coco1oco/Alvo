@@ -495,36 +495,24 @@ function renderCharts() {
           {
             label: 'Income',
             data: data.value.cashflow.map(c => c.income),
-            backgroundColor: (context) => {
-              const ctx = context.chart.ctx;
-              const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-              gradient.addColorStop(0, 'rgba(120, 140, 93, 0.4)');
-              gradient.addColorStop(1, 'rgba(120, 140, 93, 0)');
-              return gradient;
-            },
-            borderColor: 'var(--success)',
+            borderColor: '#10b981', 
+            backgroundColor: 'rgba(16, 185, 129, 0.15)',
             borderWidth: 2,
             fill: true,
             tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
           },
           {
             label: 'Expenses',
             data: data.value.cashflow.map(c => c.expense),
-            backgroundColor: (context) => {
-              const ctx = context.chart.ctx;
-              const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-              gradient.addColorStop(0, 'rgba(224, 49, 49, 0.4)');
-              gradient.addColorStop(1, 'rgba(224, 49, 49, 0)');
-              return gradient;
-            },
-            borderColor: 'var(--danger)',
+            borderColor: '#ef4444', 
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
             borderWidth: 2,
             fill: true,
             tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
           },
         ],
       },

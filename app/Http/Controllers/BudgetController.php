@@ -33,6 +33,7 @@ class BudgetController extends AbstractController
                     ->sum('amount');
 
                 return array_merge($budget->toArray(), [
+                    'budget' => (float) $budget->amount,
                     'spent' => (float) $spent,
                     'remaining' => max(0, (float) $budget->amount - (float) $spent),
                     'percentage' => $budget->amount > 0
