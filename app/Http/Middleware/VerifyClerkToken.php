@@ -62,6 +62,38 @@ class VerifyClerkToken
                 ]
             );
 
+            // Seed defaults for new users
+            if ($user->wasRecentlyCreated) {
+                $defaultCategories = [
+                    ['name' => 'Salary',       'type' => 'income',  'color' => '#22c55e', 'icon' => 'briefcase'],
+                    ['name' => 'Freelance',    'type' => 'income',  'color' => '#10b981', 'icon' => 'laptop'],
+                    ['name' => 'Investment',   'type' => 'income',  'color' => '#06b6d4', 'icon' => 'trending-up'],
+                    ['name' => 'Gift',         'type' => 'income',  'color' => '#a78bfa', 'icon' => 'gift'],
+                    ['name' => 'Other Income', 'type' => 'income',  'color' => '#64748b', 'icon' => 'plus-circle'],
+                    ['name' => 'Food',          'type' => 'expense', 'color' => '#f97316', 'icon' => 'utensils'],
+                    ['name' => 'Rent',          'type' => 'expense', 'color' => '#ef4444', 'icon' => 'home'],
+                    ['name' => 'Transport',     'type' => 'expense', 'color' => '#3b82f6', 'icon' => 'car'],
+                    ['name' => 'Shopping',      'type' => 'expense', 'color' => '#ec4899', 'icon' => 'shopping-bag'],
+                    ['name' => 'Utilities',     'type' => 'expense', 'color' => '#f59e0b', 'icon' => 'zap'],
+                    ['name' => 'Healthcare',    'type' => 'expense', 'color' => '#14b8a6', 'icon' => 'heart'],
+                    ['name' => 'Entertainment', 'type' => 'expense', 'color' => '#8b5cf6', 'icon' => 'film'],
+                    ['name' => 'Education',     'type' => 'expense', 'color' => '#6366f1', 'icon' => 'book'],
+                    ['name' => 'Other',         'type' => 'expense', 'color' => '#64748b', 'icon' => 'more-horizontal'],
+                ];
+
+                $defaultAccounts = [
+                    ['name' => 'Cash Wallet',  'type' => 'cash', 'color' => '#22c55e', 'icon' => 'wallet',   'balance' => 0],
+                    ['name' => 'Bank Account', 'type' => 'bank', 'color' => '#6366f1', 'icon' => 'landmark', 'balance' => 0],
+                ];
+
+                foreach ($defaultCategories as $cat) {
+                    \App\Models\Category::create(array_merge($cat, ['user_id' => $user->id]));
+                }
+                foreach ($defaultAccounts as $acc) {
+                    \App\Models\Account::create(array_merge($acc, ['user_id' => $user->id]));
+                }
+            }
+
             // If user existed but didn't have email updated, sync it if present
             if ($email && $user->email !== $email) {
                 $user->update(['email' => $email]);
