@@ -53,79 +53,57 @@
           <h2 class="font-headline-lg text-headline-lg mb-4">Precision Engineered Features.</h2>
           <p class="font-body-md text-body-md text-[var(--text-secondary)] max-w-xl">Every tool you need to master your net worth, built with the speed and reliability of modern fintech.</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[390px]">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
           <!-- Unified Accounts -->
-          <div class="md:col-span-8 glass-panel rounded-3xl overflow-hidden group p-8 flex flex-col md:flex-row items-stretch justify-between gap-6 relative bento-card">
-            <div class="w-full md:w-5/12 flex flex-col justify-between relative z-10 pr-2">
-              <div>
-                <div class="w-12 h-12 bg-[var(--primary)]/10 rounded-xl flex items-center justify-center mb-6 border border-[var(--primary)]/20">
-                  <svg class="w-6 h-6 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V10M5 21V10M12 3L2 10h20L12 3zM3 21h18M9 21v-8m6 8v-8"></path></svg>
-                </div>
-                <h3 class="font-headline-md text-headline-md mb-3">Unified Accounts</h3>
-                <p class="font-body-md text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">Sync all your banks, credit cards, and investment accounts. Real-time data from over 12,000 institutions globally.</p>
+          <div class="md:col-span-8 glass-panel rounded-3xl overflow-hidden group p-8 flex flex-col md:flex-row items-center gap-8 relative bento-card">
+            <div class="w-full md:w-1/2 flex flex-col justify-center relative z-10">
+              <div class="w-12 h-12 bg-[var(--primary)]/10 rounded-xl flex items-center justify-center mb-6 border border-[var(--primary)]/20">
+                <svg class="w-6 h-6 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V10M5 21V10M12 3L2 10h20L12 3zM3 21h18M9 21v-8m6 8v-8"></path></svg>
               </div>
+              <h3 class="font-headline-md text-headline-md mb-3">Unified Accounts</h3>
+              <p class="font-body-md text-base text-[var(--text-secondary)] leading-relaxed">Sync all your banks, credit cards, and investment accounts. Real-time data from over 12,000 institutions globally.</p>
             </div>
-            <div class="w-full md:w-7/12 h-52 md:h-auto rounded-2xl overflow-hidden border border-white/10 shadow-lg relative bg-black/40 flex-shrink-0">
+            <div class="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-lg relative bg-black/40 flex-shrink-0">
               <img class="w-full h-full object-cover object-left-top transform group-hover:scale-105 transition-transform duration-700" alt="Alvo Accounts Overview" :src="'/screenshots/creditcard.jpg'" />
             </div>
           </div>
           <!-- Smart Tracking -->
           <div class="md:col-span-4 bg-[var(--bg-surface)] rounded-3xl border border-[var(--border)] p-8 flex flex-col group hover:border-[var(--primary)]/40 transition-all duration-300 hover:-translate-y-2 bento-card">
-            <div class="mb-6">
+            <div class="mb-6 relative z-10">
               <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center border border-secondary/20 group-hover:scale-110 transition-transform">
                 <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               </div>
             </div>
-            <h3 class="font-headline-md text-headline-md mb-2">Smart Tracking</h3>
-            <p class="font-body-md text-body-md text-[var(--text-secondary)] mb-auto">Auto-categorization that actually works. We learn your spending habits to provide 99.9% accuracy.</p>
-            <div class="mt-6 rounded-xl overflow-hidden border border-white/10 h-36">
+            <h3 class="font-headline-md text-headline-md mb-2 relative z-10">Smart Tracking</h3>
+            <p class="font-body-md text-base text-[var(--text-secondary)] mb-8 relative z-10">Auto-categorization that actually works. We learn your spending habits to provide 99.9% accuracy.</p>
+            <div class="mt-auto aspect-video rounded-xl overflow-hidden border border-white/10 relative z-10">
               <img class="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="Alvo Transaction Tracking" :src="'/screenshots/transaction.jpg'" />
             </div>
           </div>
           <!-- Insightful Analytics -->
-          <div id="analytics" class="md:col-span-5 bg-[var(--bg-surface)] rounded-3xl border border-[var(--border)] p-8 flex flex-col justify-between group hover:border-[var(--primary)]/40 transition-all duration-300 hover:-translate-y-2 relative overflow-hidden bento-card">
-            <div class="relative z-10">
+          <div id="analytics" class="md:col-span-5 bg-[var(--bg-surface)] rounded-3xl border border-[var(--border)] p-8 flex flex-col group hover:border-[var(--primary)]/40 transition-all duration-300 hover:-translate-y-2 relative overflow-hidden bento-card">
+            <div class="relative z-10 mb-8">
               <div class="w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center mb-5 border border-tertiary/20 group-hover:scale-110 transition-transform">
                 <svg class="w-6 h-6 text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
               </div>
               <h3 class="font-headline-md text-headline-md mb-2">Insightful Analytics</h3>
-              <p class="font-body-md text-sm text-[var(--text-secondary)] leading-relaxed">Deep-dive into your financial trends with high-precision charts. Predict future cash flow based on historical data.</p>
+              <p class="font-body-md text-base text-[var(--text-secondary)] leading-relaxed">Deep-dive into your financial trends with high-precision charts. Predict future cash flow based on historical data.</p>
             </div>
-            <div class="mt-4 h-40 w-full rounded-2xl overflow-hidden border border-white/10 relative z-10 shadow-md bg-black/40">
+            <div class="mt-auto aspect-video w-full rounded-2xl overflow-hidden border border-white/10 relative z-10 shadow-md bg-black/40">
               <img class="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" alt="Alvo Analytics & Subscriptions" :src="'/screenshots/report.jpg'" />
             </div>
           </div>
           <!-- Recurring & Splits -->
           <div class="md:col-span-7 glass-panel rounded-3xl p-8 flex flex-col md:flex-row items-center gap-8 group bento-card">
-            <div class="flex-1">
+            <div class="w-full md:w-1/2 flex flex-col justify-center relative z-10">
               <div class="w-12 h-12 bg-[var(--primary)]/10 rounded-xl flex items-center justify-center mb-6 border border-[var(--primary)]/20">
                 <svg class="w-6 h-6 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
               </div>
               <h3 class="font-headline-md text-headline-md mb-2">Recurring &amp; Splits</h3>
-              <p class="font-body-md text-body-md text-[var(--text-secondary)]">Never miss a subscription. Track Netflix, Spotify, and more. Split shared household expenses with one-click exports.</p>
+              <p class="font-body-md text-base text-[var(--text-secondary)]">Never miss a subscription. Track Netflix, Spotify, and more. Split shared household expenses with one-click exports.</p>
             </div>
-            <div class="flex-1 w-full space-y-3">
-              <div class="p-3 bg-[var(--bg-surface)] rounded-xl border border-white/5 flex items-center justify-between transform group-hover:-translate-x-2 transition-all duration-300 hover:bg-white/5">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
-                  <span class="text-sm">Netflix Premium</span>
-                </div>
-                <span class="text-sm font-bold">$19.99/mo</span>
-              </div>
-              <div class="p-3 bg-[var(--bg-surface)] rounded-xl border border-white/5 flex items-center justify-between transform group-hover:translate-x-2 transition-all duration-300 hover:bg-white/5">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg></div>
-                  <span class="text-sm">Fiber Internet</span>
-                </div>
-                <span class="text-sm font-bold">$70.00/mo</span>
-              </div>
-              <div class="p-3 bg-[var(--bg-surface)] rounded-xl border border-white/5 flex items-center justify-between transform group-hover:-translate-x-2 transition-all duration-300 hover:bg-white/5">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                  <span class="text-sm">Utilities Split</span>
-                </div>
-                <span class="text-sm font-bold">-$125.40</span>
-              </div>
+            <div class="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-lg relative bg-black/40 flex-shrink-0">
+              <img class="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100" alt="Alvo Subscriptions" :src="'/screenshots/subscription.jpg'" />
             </div>
           </div>
         </div>
